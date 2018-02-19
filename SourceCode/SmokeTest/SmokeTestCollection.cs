@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 namespace SmokeTest
 {
-    public class RsapiTests
+    public class SmokeTestCollection
     {
         public IRSAPIClient RsapiClient { get; set; }
         public IAgentManager AgentManager { get; set; }
@@ -21,7 +21,7 @@ namespace SmokeTest
         public int WorkspaceArtifactId { get; set; }
         public int DocumentIdentifierFieldArtifactId { get; set; }
 
-        public RsapiTests(IRSAPIClient rsapiClient, IAgentManager agentManager, IProductionManager productionManager,
+        public SmokeTestCollection(IRSAPIClient rsapiClient, IAgentManager agentManager, IProductionManager productionManager,
         IProductionDataSourceManager productionDataSourceManager,
         IKeywordSearchManager keywordSearchManager, int workspaceArtifactId, int documentIdentifierFieldArtifactId)
         {
@@ -37,12 +37,30 @@ namespace SmokeTest
         public void RunAllTests()
         {
             IRdoHelper rdoHelper = new RdoHelper();
-            RunTest("FieldTest", rdoHelper, FieldTest);
-            RunTest("GroupTest", rdoHelper, GroupTest);
-            RunTest("UserTest", rdoHelper, UserTest);
-            RunTest("WorkspaceTest", rdoHelper, WorkspaceTest);
-            RunTest("AgentTest", rdoHelper, AgentTest);
-            RunTest("ProductionTest", rdoHelper, ProductionTest);
+            CheckAndRunTest("FieldTest", rdoHelper, FieldTest);
+            CheckAndRunTest("GroupTest", rdoHelper, GroupTest);
+            CheckAndRunTest("UserTest", rdoHelper, UserTest);
+            CheckAndRunTest("WorkspaceTest", rdoHelper, WorkspaceTest);
+            CheckAndRunTest("AgentTest", rdoHelper, AgentTest);
+            CheckAndRunTest("ProductionTest", rdoHelper, ProductionTest);
+        }
+
+        private void CheckAndRunTest(string testName, IRdoHelper rdoHelper, Func<ResultModel> testMethodName)
+        {
+            string errorContext = "An error occured when checking for existing test and running a new test if it not exists.";
+            try
+            {
+                bool doesTestExists = rdoHelper.CheckIfTestsRdoRecordExists(RsapiClient, WorkspaceArtifactId, testName);
+                if (!doesTestExists)
+                {
+                    // Only Run a Test if it is not already run.
+                    RunTest(testName, rdoHelper, testMethodName);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new SmokeTestException($"{errorContext}. [TestName: {testName}]", ex);
+            }
         }
 
         private void RunTest(string testName, IRdoHelper rdoHelper, Func<ResultModel> testMethodName)
@@ -116,7 +134,7 @@ namespace SmokeTest
         {
             IAgentHelper agentHelper = new AgentHelper();
             string agentName = $"{Constants.Prefix}-{Guid.NewGuid()}";
-            int agentTypeId = agentHelper.GetAgentTypeArtifactId(AgentManager, Constants.SmokeTestAgentName);
+            int agentTypeId = agentHelper.GetAgentTypeArtifactId(AgentManager, Constants.TestAgentToCreateName);
             int agentServer = agentHelper.GetFirstAgentServerArtifactId(AgentManager);
             ResultModel agentResultModel = agentHelper.CreateAgent(
               agentManager: AgentManager,

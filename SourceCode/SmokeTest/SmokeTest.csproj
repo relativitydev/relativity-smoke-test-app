@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SmokeTest</RootNamespace>
     <AssemblyName>SmokeTest</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -31,36 +31,35 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="kCura.Agent, Version=9.4.398.62, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Assemblies\kCura.Agent.dll</HintPath>
+    <Reference Include="kCura.Agent, Version=9.5.370.136, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Relativity.Agent.9.5.370.136\lib\kCura.Agent.dll</HintPath>
     </Reference>
-    <Reference Include="kCura.EventHandler, Version=9.4.398.62, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Assemblies\kCura.EventHandler.dll</HintPath>
+    <Reference Include="kCura.EventHandler, Version=9.5.370.136, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Relativity.EventHandler.9.5.370.136\lib\kCura.EventHandler.dll</HintPath>
     </Reference>
-    <Reference Include="kCura.Relativity.Client, Version=9.4.398.62, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Assemblies\kCura.Relativity.Client.dll</HintPath>
+    <Reference Include="kCura.Relativity.Client, Version=9.5.370.136, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Relativity.Rsapi.9.5.370.136\lib\kCura.Relativity.Client.dll</HintPath>
     </Reference>
-    <Reference Include="Relativity.API, Version=9.4.398.62, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Assemblies\Relativity.API.dll</HintPath>
+    <Reference Include="Relativity.API, Version=9.5.370.136, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Relativity.Api.9.5.370.136\lib\Relativity.API.dll</HintPath>
+    </Reference>
+    <Reference Include="Relativity.Kepler, Version=1.0.1.423, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Relativity.ObjectManager.9.5.370.136\lib\Relativity.Kepler.dll</HintPath>
     </Reference>
     <Reference Include="Relativity.Productions.Services.Interfaces">
       <HintPath>..\Assemblies\Relativity.Productions.Services.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="Relativity.Services.DataContracts">
-      <HintPath>..\Assemblies\Relativity.Services.DataContracts.dll</HintPath>
+    <Reference Include="Relativity.Services.DataContracts, Version=9.5.370.136, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Relativity.ObjectManager.9.5.370.136\lib\Relativity.Services.DataContracts.dll</HintPath>
     </Reference>
-    <Reference Include="Relativity.Services.Interfaces">
-      <HintPath>..\Assemblies\Relativity.Services.Interfaces.dll</HintPath>
+    <Reference Include="Relativity.Services.Interfaces, Version=9.5.370.136, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Relativity.ObjectManager.9.5.370.136\lib\Relativity.Services.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="Relativity.Services.Interfaces.Private">
       <HintPath>..\Assemblies\Relativity.Services.Interfaces.Private.dll</HintPath>
     </Reference>
-    <Reference Include="Relativity.Services.ServiceProxy">
-      <HintPath>..\Assemblies\Relativity.Services.ServiceProxy.dll</HintPath>
+    <Reference Include="Relativity.Services.ServiceProxy, Version=1.0.1.392, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Relativity.ObjectManager.9.5.370.136\lib\Relativity.Services.ServiceProxy.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -72,6 +71,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Agents\SmokeTestRunnerAgent.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Helpers\AgentHelper.cs" />
     <Compile Include="Helpers\ChoiceHelper.cs" />
@@ -91,17 +91,18 @@
     <Compile Include="Helpers\UserHelper.cs" />
     <Compile Include="Interfaces\IGroupHelper.cs" />
     <Compile Include="Interfaces\IFieldHelper.cs" />
-    <Compile Include="EventHandlers\PostInstallEventHandler.cs" />
     <Compile Include="Models\ClientModel.cs" />
     <Compile Include="Models\MarkupSetModel.cs" />
     <Compile Include="Models\ProductionModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\ResultModel.cs" />
-    <Compile Include="Agents\SmokeTestAgent.cs" />
+    <Compile Include="Agents\DummyAgent.cs" />
     <Compile Include="Exceptions\SmokeTestException.cs" />
-    <Compile Include="RsapiTests.cs" />
+    <Compile Include="SmokeTestCollection.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

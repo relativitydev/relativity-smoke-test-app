@@ -11,7 +11,7 @@ namespace SmokeTest.Tests
     [TestFixture]
     public class RsapiTestsNunit
     {
-        public RsapiTests Sut { get; set; }
+        public SmokeTestCollection Sut { get; set; }
         public ServiceFactory ServiceFactory { get; set; }
         public IRSAPIClient RsapiClient { get; set; }
         public IAgentManager AgentManager { get; set; }
@@ -29,7 +29,7 @@ namespace SmokeTest.Tests
             ProductionDataSourceManager = ServiceFactory.CreateProxy<IProductionDataSourceManager>();
             KeywordSearchManager = ServiceFactory.CreateProxy<IKeywordSearchManager>();
             int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(Constants.WorkspaceArtifactId);
-            Sut = new RsapiTests(
+            Sut = new SmokeTestCollection(
                 rsapiClient: RsapiClient,
                 agentManager: AgentManager,
                 productionManager: ProductionManager,

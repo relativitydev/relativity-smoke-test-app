@@ -4,7 +4,8 @@ namespace SmokeTest
 {
     public class Constants
     {
-        public const string SmokeTestAgentName = "Smoke Test Agent";
+        public const string SmokeTestRunnerAgentName = "Smoke Test Runner Agent";
+        public const string TestAgentToCreateName = "Dummy Agent";
         public static readonly string Prefix = "ST";
         public static readonly int GroupIdentifierFieldArtifactId = 1003671;
 
@@ -20,17 +21,17 @@ namespace SmokeTest
 
             public class ObjectType
             {
-                public static readonly Guid Tests = new Guid("60CC6D15-5D97-4498-8D15-FCDCAC7601A1");
+                public static readonly Guid Test = new Guid("71ED667F-EE38-4BC7-AB76-6645D8A5587F");
             }
 
             public class Fields
             {
-                public class Tests
+                public class Test
                 {
-                    public static readonly Guid ArtifactId = new Guid("DA9A845B-0160-43CF-9782-BEE16B9A679F");
-                    public static readonly Guid Name = new Guid("136A347B-A7F7-465F-8923-62EA406D80A7");
-                    public static readonly Guid Result = new Guid("88FAE1B1-5E2E-426B-A5EE-BEC5AA05C07C");
-                    public static readonly Guid ErrorMessage = new Guid("683DF9FA-0D64-4EE3-8861-72F68A2BC4FC");
+                    public static readonly Guid ArtifactId = new Guid("FB785856-785C-4E42-9772-6F69A4ED3119");
+                    public static readonly Guid Name = new Guid("9D9F70EF-0AB1-4912-849E-418976EA92CF");
+                    public static readonly Guid Result = new Guid("A057E0A2-73CE-44B1-AF8D-F8B896358446");
+                    public static readonly Guid ErrorMessage = new Guid("D289FEAA-76F4-4E82-86D6-E2E522F42A71");
                 }
             }
         }
