@@ -1,5 +1,8 @@
-﻿using kCura.Relativity.Client;
+﻿using kCura.Data.RowDataGateway;
+using kCura.Relativity.Client;
 using NUnit.Framework;
+using Relativity.API;
+using Relativity.DocumentViewer.Services;
 using Relativity.Productions.Services;
 using Relativity.Services.Agent;
 using Relativity.Services.Search;
@@ -28,6 +31,9 @@ namespace SmokeTest.Tests
             ProductionManager = ServiceFactory.CreateProxy<IProductionManager>();
             ProductionDataSourceManager = ServiceFactory.CreateProxy<IProductionDataSourceManager>();
             KeywordSearchManager = ServiceFactory.CreateProxy<IKeywordSearchManager>();
+            IDocumentViewerServiceManager documentViewerServiceManager = ServiceFactory.CreateProxy<IDocumentViewerServiceManager>();
+            IDBContext workspaceDbContext = new DBContext(new Context("serverName", "databaseName", "sqlServerUsername", "sqlServerPassword"));
+
             int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(Constants.WorkspaceArtifactId);
             Sut = new SmokeTestCollection(
                 rsapiClient: RsapiClient,
@@ -35,6 +41,8 @@ namespace SmokeTest.Tests
                 productionManager: ProductionManager,
                 productionDataSourceManager: ProductionDataSourceManager,
                 keywordSearchManager: KeywordSearchManager,
+                documentViewerServiceManager: documentViewerServiceManager,
+                workspaceDbContext: workspaceDbContext,
                 workspaceArtifactId: Constants.WorkspaceArtifactId,
                 documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId);
         }

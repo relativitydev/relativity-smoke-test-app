@@ -1,5 +1,6 @@
 ﻿using kCura.Relativity.Client;
 using Relativity.API;
+using Relativity.DocumentViewer.Services;
 using Relativity.Productions.Services;
 using Relativity.Services.Agent;
 using Relativity.Services.Search;
@@ -25,8 +26,9 @@ namespace SmokeTest.Agents
                 IProductionManager productionManager = Helper.GetServicesManager().CreateProxy<IProductionManager>(systemExecutionIdentity);
                 IProductionDataSourceManager productionDataSourceManager = Helper.GetServicesManager().CreateProxy<IProductionDataSourceManager>(systemExecutionIdentity);
                 IKeywordSearchManager keywordSearchManager = Helper.GetServicesManager().CreateProxy<IKeywordSearchManager>(systemExecutionIdentity);
+                IDocumentViewerServiceManager documentViewerServiceManager = Helper.GetServicesManager().CreateProxy<IDocumentViewerServiceManager>(systemExecutionIdentity);
                 IDBContext eddsDbContext = Helper.GetDBContext(-1);
-                List<int> workspaceArtifactIds = RetrieveAllApplicationWorkspaces(eddsDbContext, Constants.Guids.Application);
+                List<int> workspaceArtifactIds = RetrieveAllApplicationWorkspaces(eddsDbContext, Constants.Guids.Application.SmokeTest);
 
                 foreach (int currentWorkspaceArtifactId in workspaceArtifactIds)
                 {
@@ -40,6 +42,8 @@ namespace SmokeTest.Agents
                             productionManager: productionManager,
                             productionDataSourceManager: productionDataSourceManager,
                             keywordSearchManager: keywordSearchManager,
+                            documentViewerServiceManager: documentViewerServiceManager,
+                            workspaceDbContext: workspaceDbContext,
                             workspaceArtifactId: currentWorkspaceArtifactId,
                             documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId);
                         smokeTestCollection.RunAllTests();

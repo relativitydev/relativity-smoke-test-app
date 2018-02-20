@@ -43,6 +43,9 @@
     <Reference Include="Relativity.API, Version=9.5.370.136, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.Api.9.5.370.136\lib\Relativity.API.dll</HintPath>
     </Reference>
+    <Reference Include="Relativity.DocumentViewer.Services.Interfaces">
+      <HintPath>..\Assemblies\Relativity.DocumentViewer.Services.Interfaces.dll</HintPath>
+    </Reference>
     <Reference Include="Relativity.Kepler, Version=1.0.1.423, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.ObjectManager.9.5.370.136\lib\Relativity.Kepler.dll</HintPath>
     </Reference>
@@ -78,6 +81,10 @@
     <Compile Include="Helpers\ClientHelper.cs" />
     <Compile Include="Helpers\FieldHelper.cs" />
     <Compile Include="Helpers\GroupHelper.cs" />
+    <Compile Include="Interfaces\IViewerHelper.cs" />
+    <Compile Include="Helpers\ViewerHelper.cs" />
+    <Compile Include="Interfaces\IImageHelper.cs" />
+    <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Interfaces\IRdoHelper.cs" />
     <Compile Include="Helpers\RdoHelper.cs" />
     <Compile Include="Interfaces\IProductionHelper.cs" />

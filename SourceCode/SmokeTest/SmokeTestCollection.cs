@@ -1,4 +1,6 @@
 ﻿using kCura.Relativity.Client;
+using Relativity.API;
+using Relativity.DocumentViewer.Services;
 using Relativity.Productions.Services;
 using Relativity.Services.Agent;
 using Relativity.Services.Search;
@@ -8,6 +10,7 @@ using SmokeTest.Interfaces;
 using SmokeTest.Models;
 using System;
 using System.Collections.Generic;
+using IAgentHelper = SmokeTest.Interfaces.IAgentHelper;
 
 namespace SmokeTest
 {
@@ -18,18 +21,22 @@ namespace SmokeTest
         public IProductionManager ProductionManager { get; set; }
         public IProductionDataSourceManager ProductionDataSourceManager { get; set; }
         public IKeywordSearchManager KeywordSearchManager { get; set; }
+        public IDocumentViewerServiceManager DocumentViewerServiceManager { get; set; }
+        public IDBContext WorkspaceDbContext { get; set; }
         public int WorkspaceArtifactId { get; set; }
         public int DocumentIdentifierFieldArtifactId { get; set; }
 
         public SmokeTestCollection(IRSAPIClient rsapiClient, IAgentManager agentManager, IProductionManager productionManager,
         IProductionDataSourceManager productionDataSourceManager,
-        IKeywordSearchManager keywordSearchManager, int workspaceArtifactId, int documentIdentifierFieldArtifactId)
+        IKeywordSearchManager keywordSearchManager, IDocumentViewerServiceManager documentViewerServiceManager, IDBContext workspaceDbContext, int workspaceArtifactId, int documentIdentifierFieldArtifactId)
         {
             RsapiClient = rsapiClient;
             AgentManager = agentManager;
             ProductionManager = productionManager;
             ProductionDataSourceManager = productionDataSourceManager;
             KeywordSearchManager = keywordSearchManager;
+            DocumentViewerServiceManager = documentViewerServiceManager;
+            WorkspaceDbContext = workspaceDbContext;
             WorkspaceArtifactId = workspaceArtifactId;
             DocumentIdentifierFieldArtifactId = documentIdentifierFieldArtifactId;
         }
@@ -43,6 +50,8 @@ namespace SmokeTest
             CheckAndRunTest("WorkspaceTest", rdoHelper, WorkspaceTest);
             CheckAndRunTest("AgentTest", rdoHelper, AgentTest);
             CheckAndRunTest("ProductionTest", rdoHelper, ProductionTest);
+            CheckAndRunTest("ImageDocumentsTest", rdoHelper, ImageTest);
+            CheckAndRunTest("DocumentConversionTest", rdoHelper, ViewerTest);
         }
 
         private void CheckAndRunTest(string testName, IRdoHelper rdoHelper, Func<ResultModel> testMethodName)
@@ -215,6 +224,20 @@ namespace SmokeTest
                 productionResultModel.ErrorMessage = ex.ToString();
             }
             return productionResultModel;
+        }
+
+        public ResultModel ImageTest()
+        {
+            IImageHelper imageHelper = new ImageHelper();
+            ResultModel imageResultModel = imageHelper.ImageDocuments(RsapiClient, WorkspaceArtifactId);
+            return imageResultModel;
+        }
+
+        public ResultModel ViewerTest()
+        {
+            IViewerHelper viewerHelper = new ViewerHelper();
+            ResultModel imageResultModel = viewerHelper.ConvertDocumentsForViewer(RsapiClient, DocumentViewerServiceManager, WorkspaceDbContext, WorkspaceArtifactId);
+            return imageResultModel;
         }
     }
 }

@@ -31,12 +31,21 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="kCura, Version=9.5.370.136, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Relativity.Other.9.5.370.136\lib\kCura.dll</HintPath>
+    </Reference>
     <Reference Include="kCura.Relativity.Client, Version=9.5.370.136, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.Rsapi.9.5.370.136\lib\kCura.Relativity.Client.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=3.7.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.7.1\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="Relativity.API, Version=9.5.370.136, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Relativity.Api.9.5.370.136\lib\Relativity.API.dll</HintPath>
+    </Reference>
+    <Reference Include="Relativity.DocumentViewer.Services.Interfaces">
+      <HintPath>..\Assemblies\Relativity.DocumentViewer.Services.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="Relativity.Kepler, Version=1.0.1.423, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.ObjectManager.9.5.370.136\lib\Relativity.Kepler.dll</HintPath>
