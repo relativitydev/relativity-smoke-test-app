@@ -43,15 +43,16 @@ namespace SmokeTest
 
         public void RunAllTests()
         {
+            // Order of tests is import because documents have to be imaged first before running conversion and production tests.
             IRdoHelper rdoHelper = new RdoHelper();
             CheckAndRunTest("FieldTest", rdoHelper, FieldTest);
             CheckAndRunTest("GroupTest", rdoHelper, GroupTest);
             CheckAndRunTest("UserTest", rdoHelper, UserTest);
             CheckAndRunTest("WorkspaceTest", rdoHelper, WorkspaceTest);
             CheckAndRunTest("AgentTest", rdoHelper, AgentTest);
-            CheckAndRunTest("ProductionTest", rdoHelper, ProductionTest);
             CheckAndRunTest("ImageDocumentsTest", rdoHelper, ImageTest);
             CheckAndRunTest("DocumentConversionTest", rdoHelper, ViewerTest);
+            CheckAndRunTest("ProductionTest", rdoHelper, ProductionTest);
         }
 
         private void CheckAndRunTest(string testName, IRdoHelper rdoHelper, Func<ResultModel> testMethodName)
