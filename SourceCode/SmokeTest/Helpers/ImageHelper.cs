@@ -1,22 +1,32 @@
 ﻿using kCura.Relativity.Client;
-using kCura.Relativity.Client.DTOs;
+using Relativity.Imaging.Services.Interfaces;
 using SmokeTest.Exceptions;
 using SmokeTest.Interfaces;
 using SmokeTest.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace SmokeTest.Helpers
 {
     public class ImageHelper : IImageHelper
     {
-        public ResultModel ImageDocuments(IRSAPIClient rsapiClient, int workspaceArtifactId)
+        public ResultModel ImageDocuments(IRSAPIClient rsapiClient, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, int workspaceArtifactId)
         {
             if (rsapiClient == null)
             {
                 throw new ArgumentNullException(nameof(rsapiClient));
+            }
+            if (imagingProfileManager == null)
+            {
+                throw new ArgumentNullException(nameof(imagingProfileManager));
+            }
+            if (imagingSetManager == null)
+            {
+                throw new ArgumentNullException(nameof(imagingSetManager));
+            }
+            if (imagingJobManager == null)
+            {
+                throw new ArgumentNullException(nameof(imagingJobManager));
             }
             if (workspaceArtifactId < 1)
             {
@@ -28,20 +38,23 @@ namespace SmokeTest.Helpers
             try
             {
                 rsapiClient.APIOptions.WorkspaceID = workspaceArtifactId;
+                int? imagingSetArtifactId = null;
 
                 try
                 {
+                    // Create Imaging Profile record
+                    string imagingProfileName = $"{Constants.Prefix} - Imaging Profile - {DateTime.Now}";
+                    int imagingProfileArtifactId = CreateImagingProfileRecord(imagingProfileManager, workspaceArtifactId, imagingProfileName);
+
                     // Create Imaging Set record
                     string imagingSetName = $"{Constants.Prefix} - Imaging Set - {DateTime.Now}";
+                    imagingSetArtifactId = CreateImagingSetRecord(rsapiClient, imagingSetManager, workspaceArtifactId, imagingSetName, Constants.AllDocumentsSavedSearchName, imagingProfileArtifactId);
 
-                    int imagingSetArtifactId = CreateImagingSetRecord(rsapiClient, workspaceArtifactId, imagingSetName, Constants.BasicDefaultimagingProfileName, Constants.AllDocumentsSavedSearchName);
-
-                    // Create Imaging Set Scheduler record
-                    string imagingSetSchedulerName = $"{Constants.Prefix} - Imaging Set Scheduler - {DateTime.Now}";
-                    int imagingSetSchedulerArtifactId = CreateImagingSetSchedulerRecord(rsapiClient, workspaceArtifactId, imagingSetSchedulerName, imagingSetArtifactId);
+                    // Run Imaging Set
+                    RunImagingSet(imagingJobManager, workspaceArtifactId, imagingSetArtifactId.Value);
 
                     // Wait to check if documents are imaged
-                    bool areDocumentsImaged = CheckIfImagingSetIsCompleted(rsapiClient, workspaceArtifactId, imagingSetArtifactId);
+                    bool areDocumentsImaged = CheckIfImagingSetIsCompleted(imagingSetManager, workspaceArtifactId, imagingSetArtifactId.Value);
                     if (!areDocumentsImaged)
                     {
                         throw new SmokeTestException("Documents were not successfully imaged. Imaging Set did not Complete.");
@@ -49,11 +62,18 @@ namespace SmokeTest.Helpers
 
                     // Set resultModel properties
                     resultModel.Success = true;
-                    resultModel.ArtifactId = imagingSetSchedulerArtifactId;
+                    resultModel.ArtifactId = imagingSetArtifactId.Value;
                 }
                 catch (Exception ex)
                 {
                     throw new SmokeTestException("An error occured when imaging documents.", ex);
+                }
+                finally
+                {
+                    if (imagingSetArtifactId != null)
+                    {
+                        DeleteImagingSet(imagingSetManager, imagingProfileManager, workspaceArtifactId, imagingSetArtifactId.Value);
+                    }
                 }
             }
             catch (Exception ex)
@@ -65,187 +85,262 @@ namespace SmokeTest.Helpers
             return resultModel;
         }
 
-        private int GetImagingProfileArtifactId(IRSAPIClient rsapiClient, int workspaceArtifactId, string imagingProfileName)
+        public void DeleteImagingSet(IImagingSetManager imagingSetManager, IImagingProfileManager imagingProfileManager, int workspaceArtifactId, int imagingSetArtifactId)
         {
-            string errorContext = $"An error occured when querying for '{imagingProfileName}' Imaging Profile.";
+            string errorContext = $"An error occured when deleting an Imaging Set [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]";
             try
             {
-                rsapiClient.APIOptions.WorkspaceID = workspaceArtifactId;
+                Console.WriteLine($"Deleting Imaging Set and its associated Imaging Profile. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]");
 
-                TextCondition nameTextCondition = new TextCondition(ArtifactFieldNames.TextIdentifier, TextConditionEnum.EqualTo, "Basic Default");
-                Query<RDO> imagingProfileRdoQuery = new Query<RDO>
+                // Retrieve Imaging Set
+                ImagingSet imagingSet = RetrieveImagingSetRecord(imagingSetManager, workspaceArtifactId, imagingSetArtifactId);
+
+                // Delete Imaging Set
+                DeleteImagingSetRecord(imagingSetManager, workspaceArtifactId, imagingSet.ArtifactID);
+
+                // Delete Imaging Profile
+                int imagingProfileArtifactId = imagingSet.ImagingProfile.ArtifactID;
+                DeleteImagingProfileRecord(imagingProfileManager, workspaceArtifactId, imagingProfileArtifactId);
+
+                Console.WriteLine($"Deleted Imaging Set and its associated Imaging Profile. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"{errorContext}", ex);
+            }
+        }
+
+        private int CreateImagingProfileRecord(IImagingProfileManager imagingProfileManager, int workspaceArtifactId, string imagingProfileName)
+        {
+            string errorContext = $"An error occured when creating an Imaging Profile record. [{nameof(imagingProfileName)}: {imagingProfileName}]";
+            try
+            {
+                ImagingProfile imagingProfile = new ImagingProfile
                 {
-                    ArtifactTypeGuid = Constants.Guids.ObjectType.ImagingProfile,
-                    Condition = nameTextCondition,
-                    Fields = FieldValue.NoFields
+                    BasicOptions = new BasicImagingEngineOptions
+                    {
+                        ImageOutputDpi = 100,
+                        BasicImageFormat = ImageFormat.Jpeg,
+                        ImageSize = ImageSize.A4
+                    },
+                    Name = imagingProfileName,
+                    ImagingMethod = ImagingMethod.Basic
                 };
-                QueryResultSet<RDO> imagingProfileRdoQueryResultSet;
 
+                int imagingProfileArtifactId;
                 try
                 {
-                    imagingProfileRdoQueryResultSet = rsapiClient.Repositories.RDO.Query(imagingProfileRdoQuery);
+                    Console.WriteLine($"Creating new Imaging Profile. [{nameof(imagingProfileName)}: {imagingProfileName}]");
+                    imagingProfileArtifactId = imagingProfileManager.SaveAsync(imagingProfile, workspaceArtifactId).Result;
+                    Console.WriteLine($"Created new Imaging Profile. [{nameof(imagingProfileArtifactId)}: {imagingProfileArtifactId}]");
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception($"{errorContext}. Query.", ex);
+                    throw new Exception($"{errorContext}. SaveAsync.", ex);
                 }
-
-                if (!imagingProfileRdoQueryResultSet.Success)
-                {
-                    throw new Exception($"{errorContext}. ErrorMessage = {imagingProfileRdoQueryResultSet.Message}");
-                }
-
-                int imagingProfileArtifactId = imagingProfileRdoQueryResultSet.Results.Single().Artifact.ArtifactID;
                 return imagingProfileArtifactId;
             }
             catch (Exception ex)
             {
-                throw new Exception(errorContext, ex);
+                throw new Exception($"{errorContext}", ex);
             }
         }
 
-        private int CreateImagingSetRecord(IRSAPIClient rsapiClient, int workspaceArtifactId, string imagingSetName, string imagingProfileName, string savedSearchName)
+        private void DeleteImagingProfileRecord(IImagingProfileManager imagingProfileManager, int workspaceArtifactId, int imagingProfileArtifactId)
         {
-            string errorContext = "An error occured when creating Imaging Set Record";
+            string errorContext = $"An error occured when deleting an Imaging Profile record. [{nameof(imagingProfileArtifactId)}: {imagingProfileArtifactId}]";
             try
             {
-                rsapiClient.APIOptions.WorkspaceID = workspaceArtifactId;
-
-                RDO imagingSetRdo = new RDO
+                Console.WriteLine($"Deleting Imaging Profile. [{nameof(imagingProfileArtifactId)}: {imagingProfileArtifactId}]");
+                ImagingProfile imagingProfile = RetrieveImagingProfileRecord(imagingProfileManager, workspaceArtifactId, imagingProfileArtifactId);
+                if (imagingProfile != null && imagingProfile.ArtifactID > 0)
                 {
-                    ArtifactTypeGuids = new List<Guid>
-                        {
-                            Constants.Guids.ObjectType.ImagingSet
-                        }
-                };
+                    try
+                    {
+                        imagingProfileManager.DeleteAsync(imagingProfileArtifactId, workspaceArtifactId).Wait();
+                        Console.WriteLine($"Deleted Imaging Profile. [{nameof(imagingProfileArtifactId)}: {imagingProfileArtifactId}]");
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"{errorContext}. DeleteAsync.", ex);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Imaging Profile doesn't exist. Skipped Deletion. [{nameof(imagingProfileArtifactId)}: {imagingProfileArtifactId}]");
+                }
 
-                imagingSetRdo.Fields.Add(new FieldValue(Constants.Guids.Fields.ImagingSet.Name, imagingSetName));
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"{errorContext}", ex);
+            }
+        }
 
+        private ImagingProfile RetrieveImagingProfileRecord(IImagingProfileManager imagingProfileManager, int workspaceArtifactId, int imagingProfileArtifactId)
+        {
+            string errorContext = $"An error occured when retriving an Imaging Profile record. [{nameof(imagingProfileArtifactId)}: {imagingProfileArtifactId}]";
+            try
+            {
+                try
+                {
+                    Console.WriteLine($"Retriving Imaging Profile. [{nameof(imagingProfileArtifactId)}: {imagingProfileArtifactId}]");
+                    ImagingProfile imagingProfile = imagingProfileManager.ReadAsync(imagingProfileArtifactId, workspaceArtifactId).Result;
+                    Console.WriteLine($"Retrived Imaging Profile. [{nameof(imagingProfileArtifactId)}: {imagingProfileArtifactId}]");
+                    return imagingProfile;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"{errorContext}. DeleteAsync.", ex);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"{errorContext}", ex);
+            }
+        }
+
+        private int CreateImagingSetRecord(IRSAPIClient rsapiClient, IImagingSetManager imagingSetManager, int workspaceArtifactId, string imagingSetName, string savedSearchName, int imagingProfileArtifactId)
+        {
+            string errorContext = $"An error occured when creating an Imaging Set record. [{nameof(imagingSetName)}: {imagingSetName}]";
+            try
+            {
                 int allDocumentsSavedSearchArtifactId = SavedSearchHelper.GetSavedSearchArtifactId(rsapiClient, workspaceArtifactId, savedSearchName);
-                RDO savedSearchRdo = new RDO(allDocumentsSavedSearchArtifactId);
-                imagingSetRdo.Fields.Add(new FieldValue(Constants.Guids.Fields.ImagingSet.DataSource, savedSearchRdo));
 
-                int imagingProfileArtifactId = GetImagingProfileArtifactId(rsapiClient, workspaceArtifactId, imagingProfileName);
-                RDO imagingProfileRdo = new RDO(imagingProfileArtifactId);
-                imagingSetRdo.Fields.Add(new FieldValue(Constants.Guids.Fields.ImagingSet.ImagingProfile, imagingProfileRdo));
-
-                imagingSetRdo.Fields.Add(new FieldValue(Constants.Guids.Fields.ImagingSet.EmailNotificationRecipients, "chandra.alimeti@relativity.com"));
-                imagingSetRdo.Fields.Add(new FieldValue(Constants.Guids.Fields.ImagingSet.Status, "Staging"));
-
-                try
+                ImagingSet imagingSet = new ImagingSet
                 {
-                    int imagingSetArtifactId = rsapiClient.Repositories.RDO.CreateSingle(imagingSetRdo);
-                    return imagingSetArtifactId;
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception($"{errorContext}. CreateSingle.", ex);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"{errorContext}.", ex);
-            }
-        }
-
-        private int CreateImagingSetSchedulerRecord(IRSAPIClient rsapiClient, int workspaceArtifactId, string imagingSetSchedulerName, int imagingSetArtifactId)
-        {
-            string errorContext = "An error occured when creating Imaging Set Scheduler Record";
-            try
-            {
-                rsapiClient.APIOptions.WorkspaceID = workspaceArtifactId;
-
-                RDO imagingSetSchedulerRdo = new RDO
-                {
-                    ArtifactTypeGuids = new List<Guid>
-                        {
-                            Constants.Guids.ObjectType.ImagingSetScheduler
-                        }
+                    DataSource = allDocumentsSavedSearchArtifactId,
+                    Name = imagingSetName,
+                    ImagingProfile = new ImagingProfileRef
+                    {
+                        ArtifactID = imagingProfileArtifactId
+                    },
+                    EmailNotificationRecipients = ""
                 };
 
-                imagingSetSchedulerRdo.Fields.Add(new FieldValue(Constants.Guids.Fields.ImagingSetScheduler.Name, imagingSetSchedulerName));
-
-                RDO imagingSetRdo = new RDO(imagingSetArtifactId);
-                imagingSetSchedulerRdo.Fields.Add(new FieldValue(Constants.Guids.Fields.ImagingSetScheduler.ImagingSet, imagingSetRdo));
-
-                MultiChoiceFieldValueList frequencyMultiChoices = new MultiChoiceFieldValueList(
-                    new kCura.Relativity.Client.DTOs.Choice(Constants.Guids.Choices.ImagingSetSchedulerFrequency.Sunday),
-                    new kCura.Relativity.Client.DTOs.Choice(Constants.Guids.Choices.ImagingSetSchedulerFrequency.Monday),
-                    new kCura.Relativity.Client.DTOs.Choice(Constants.Guids.Choices.ImagingSetSchedulerFrequency.Tuesday),
-                    new kCura.Relativity.Client.DTOs.Choice(Constants.Guids.Choices.ImagingSetSchedulerFrequency.Wednesday),
-                    new kCura.Relativity.Client.DTOs.Choice(Constants.Guids.Choices.ImagingSetSchedulerFrequency.Thursday),
-                    new kCura.Relativity.Client.DTOs.Choice(Constants.Guids.Choices.ImagingSetSchedulerFrequency.Friday),
-                    new kCura.Relativity.Client.DTOs.Choice(Constants.Guids.Choices.ImagingSetSchedulerFrequency.Saturday)
-                )
-                {
-                    UpdateBehavior = MultiChoiceUpdateBehavior.Replace
-                };
-
-                imagingSetSchedulerRdo.Fields.Add(new FieldValue(Constants.Guids.Fields.ImagingSetScheduler.Frequency, frequencyMultiChoices));
-                DateTime scheduledTime = DateTime.Now.AddMinutes(1);
-                string scheduledTimeString = scheduledTime.ToString("HH:mm");
-                imagingSetSchedulerRdo.Fields.Add(new FieldValue(Constants.Guids.Fields.ImagingSetScheduler.Time, scheduledTimeString));
-
-                imagingSetSchedulerRdo.Fields.Add(new FieldValue(Constants.Guids.Fields.ImagingSetScheduler.NextRun, scheduledTime));
-                //imagingSetSchedulerRdo.Fields.Add(new FieldValue(Imaging_Set_Scheduler_Field_Status_Guid, "Waiting"));
-                imagingSetSchedulerRdo.Fields.Add(new FieldValue(Constants.Guids.Fields.ImagingSetScheduler.LockImagesForQc, false));
-
+                int imagingSetArtifactId;
                 try
                 {
-                    int imagingSetSchedulerArtifactId = rsapiClient.Repositories.RDO.CreateSingle(imagingSetSchedulerRdo);
-                    return imagingSetSchedulerArtifactId;
+                    Console.WriteLine($"Creating new Imaging Set. [{nameof(imagingSetName)}: {imagingSetName}]");
+                    imagingSetArtifactId = imagingSetManager.SaveAsync(imagingSet, workspaceArtifactId).Result;
+                    Console.WriteLine($"Created new Imaging Set. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]");
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception($"{errorContext}. CreateSingle.", ex);
+                    throw new Exception($"{errorContext}. SaveAsync.", ex);
                 }
+                return imagingSetArtifactId;
             }
             catch (Exception ex)
             {
-                throw new Exception($"{errorContext}.", ex);
+                throw new Exception($"{errorContext}", ex);
             }
         }
 
-        private string GetImagingSetStatus(IRSAPIClient rsapiClient, int workspaceArtifactId, int imagingSetArtifactId)
+        private void DeleteImagingSetRecord(IImagingSetManager imagingSetManager, int workspaceArtifactId, int imagingSetArtifactId)
         {
-            string errorContext = $"An error occured when querying for Imaging Set Status [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}].";
+            string errorContext = $"An error occured when deleting an Imaging Set record. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]";
             try
             {
-                rsapiClient.APIOptions.WorkspaceID = workspaceArtifactId;
-                RDO imagingSet;
-
-                try
+                Console.WriteLine($"Deleting Imaging Set. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]");
+                ImagingSet imagingSet = RetrieveImagingSetRecord(imagingSetManager, workspaceArtifactId, imagingSetArtifactId);
+                if (imagingSet != null && imagingSet.ArtifactID > 0)
                 {
-                    imagingSet = rsapiClient.Repositories.RDO.ReadSingle(imagingSetArtifactId);
+                    try
+                    {
+                        imagingSetManager.DeleteAsync(imagingSetArtifactId, workspaceArtifactId).Wait();
+                        Console.WriteLine($"Deleted Imaging Set. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]");
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"{errorContext}. DeleteAsync.", ex);
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    throw new Exception($"{errorContext}. ReadSingle.", ex);
+                    Console.WriteLine($"Imaging Set doesn't exist. Skipped Deletion. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]");
                 }
-
-                string status = imagingSet.Fields.First(x => x.Guids.Contains(Constants.Guids.Fields.ImagingSet.Status)).ToString();
-                return status;
             }
             catch (Exception ex)
             {
-                throw new Exception(errorContext, ex);
+                throw new Exception($"{errorContext}", ex);
             }
         }
 
-        private bool CheckIfImagingSetIsCompleted(IRSAPIClient rsapiClient, int workspaceArtifactId, int imagingSetArtifactId)
+        private ImagingSet RetrieveImagingSetRecord(IImagingSetManager imagingSetManager, int workspaceArtifactId, int imagingSetArtifactId)
+        {
+            string errorContext = $"An error occured when retriving an Imaging Set record. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]";
+            try
+            {
+                try
+                {
+                    Console.WriteLine($"Retrieving Imaging Set. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]");
+                    ImagingSet imagingSet = imagingSetManager.ReadAsync(imagingSetArtifactId, workspaceArtifactId).Result;
+                    Console.WriteLine($"Retrieved Imaging Set. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]");
+                    return imagingSet;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"{errorContext}. ReadAsync.", ex);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"{errorContext}", ex);
+            }
+        }
+
+        private void RunImagingSet(IImagingJobManager imagingJobManager, int workspaceArtifactId, int imagingSetArtifactId)
+        {
+            string errorContext = $"An error occured when running an Imaging Set [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]";
+            try
+            {
+                ImagingJob imagingJob = new ImagingJob
+                {
+                    ImagingSetId = imagingSetArtifactId,
+                    WorkspaceId = workspaceArtifactId,
+                    QcEnabled = false
+                };
+
+                // Run Imaging Set
+                Console.WriteLine($"Running Imaging Job. [{nameof(imagingSetArtifactId)}]: {imagingSetArtifactId}");
+                Guid? imagingJobGuid = (imagingJobManager.RunImagingSetAsync(imagingJob).Result).ImagingJobId;
+                Console.WriteLine($"Ran Imaging Job. [{nameof(imagingJobGuid)}]: {imagingJobGuid}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"{errorContext}", ex);
+            }
+        }
+
+        private bool CheckIfImagingSetIsCompleted(IImagingSetManager imagingSetManager, int workspaceArtifactId, int imagingSetArtifactId)
         {
             // Keep checking the status value for 15 mins.
-            const int count = 5;
-            const int waitingMinutes = 3;
+            Console.WriteLine("Checking if the documents in the Imaging Set. Check every 1 minutes for upto 15 minutes.");
+            const int count = 90;
+            const int waitingSeconds = 10;
 
             for (int i = 1; i <= count; i++)
             {
-                string status = GetImagingSetStatus(rsapiClient, workspaceArtifactId, imagingSetArtifactId);
-                if (status.Equals(Constants.ImagingSetStatus.Completed))
+                ImagingSet imagingSet = RetrieveImagingSetRecord(imagingSetManager, workspaceArtifactId, imagingSetArtifactId);
+                ImagingSetStatus imagingSetStatus = imagingSet.Status;
+                if (imagingSetStatus != null)
                 {
-                    return true;
+                    string status = imagingSetStatus.Status;
+                    Console.WriteLine($"Imaging Set status: {status}");
+                    if (status.Equals(Constants.ImagingSetJobStatus.Completed))
+                    {
+                        Console.WriteLine("Imaging Set Job Completed.");
+                        return true;
+                    }
+                    if (status.Contains("error"))
+                    {
+                        Console.WriteLine("Imaging Set Job has Errors.");
+                        return false;
+                    }
                 }
-                Thread.Sleep(waitingMinutes * 60 * 1000);
+                Console.WriteLine("Job still running. Sleeping for 10 seconds.");
+                Thread.Sleep(waitingSeconds * 1000);
             }
 
             return false;

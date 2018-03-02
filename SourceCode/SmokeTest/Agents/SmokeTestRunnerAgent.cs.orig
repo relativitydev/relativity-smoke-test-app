@@ -33,14 +33,17 @@ namespace SmokeTest.Agents
                 IProductionDataSourceManager productionDataSourceManager = Helper.GetServicesManager().CreateProxy<IProductionDataSourceManager>(systemExecutionIdentity);
                 IKeywordSearchManager keywordSearchManager = Helper.GetServicesManager().CreateProxy<IKeywordSearchManager>(systemExecutionIdentity);
                 IDocumentViewerServiceManager documentViewerServiceManager = Helper.GetServicesManager().CreateProxy<IDocumentViewerServiceManager>(systemExecutionIdentity);
+<<<<<<< HEAD
                 IProcessingCustodianManager processingCustodianManager = Helper.GetServicesManager().CreateProxy<IProcessingCustodianManager>(systemExecutionIdentity);
                 IProcessingSetManager processingSetManager = Helper.GetServicesManager().CreateProxy<IProcessingSetManager>(systemExecutionIdentity);
                 IProcessingDataSourceManager processingDataSourceManager = Helper.GetServicesManager().CreateProxy<IProcessingDataSourceManager>(systemExecutionIdentity);
+                IResourcePoolManager resourcePoolManager = Helper.GetServicesManager().CreateProxy<IResourcePoolManager>(systemExecutionIdentity);
+                IProcessingJobManager processingJobManager = Helper.GetServicesManager().CreateProxy<IProcessingJobManager>(systemExecutionIdentity);
+=======
                 IImagingProfileManager imagingProfileManager = Helper.GetServicesManager().CreateProxy<IImagingProfileManager>(systemExecutionIdentity);
                 IImagingSetManager imagingSetManager = Helper.GetServicesManager().CreateProxy<IImagingSetManager>(systemExecutionIdentity);
                 IImagingJobManager imagingJobManager = Helper.GetServicesManager().CreateProxy<IImagingJobManager>(systemExecutionIdentity);
-                IResourcePoolManager resourcePoolManager = Helper.GetServicesManager().CreateProxy<IResourcePoolManager>(systemExecutionIdentity);
-                IProcessingJobManager processingJobManager = Helper.GetServicesManager().CreateProxy<IProcessingJobManager>(systemExecutionIdentity);
+>>>>>>> bdec342a7ff8da0af805822b2d1e9cd7ad8a6db0
                 IDBContext eddsDbContext = Helper.GetDBContext(-1);
                 List<int> workspaceArtifactIds = RetrieveAllApplicationWorkspaces(eddsDbContext, Constants.Guids.Application.SmokeTest);
 
@@ -48,6 +51,7 @@ namespace SmokeTest.Agents
                 {
                     if (currentWorkspaceArtifactId != -1)
                     {
+<<<<<<< HEAD
                         try
                         {
                             IDBContext workspaceDbContext = Helper.GetDBContext(currentWorkspaceArtifactId);
@@ -59,9 +63,6 @@ namespace SmokeTest.Agents
                                 productionDataSourceManager: productionDataSourceManager,
                                 keywordSearchManager: keywordSearchManager,
                                 documentViewerServiceManager: documentViewerServiceManager,
-                                imagingProfileManager: imagingProfileManager,
-                                imagingSetManager: imagingSetManager,
-                                imagingJobManager: imagingJobManager,
                                 processingCustodianManager: processingCustodianManager,
                                 processingSetManager: processingSetManager,
                                 processingDataSourceManager: processingDataSourceManager,
@@ -89,11 +90,26 @@ namespace SmokeTest.Agents
                             processingDataSourceManager?.Dispose();
                             resourcePoolManager?.Dispose();
                             processingJobManager?.Dispose();
-                            imagingProfileManager?.Dispose();
-                            imagingSetManager?.Dispose();
-                            imagingJobManager?.Dispose();
                         }
                         
+=======
+                        IDBContext workspaceDbContext = Helper.GetDBContext(currentWorkspaceArtifactId);
+                        int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(workspaceDbContext, currentWorkspaceArtifactId);
+                        SmokeTestCollection smokeTestCollection = new SmokeTestCollection(
+                            rsapiClient: rsapiClient,
+                            agentManager: agentManager,
+                            productionManager: productionManager,
+                            productionDataSourceManager: productionDataSourceManager,
+                            keywordSearchManager: keywordSearchManager,
+                            documentViewerServiceManager: documentViewerServiceManager,
+                            imagingProfileManager: imagingProfileManager,
+                            imagingSetManager: imagingSetManager,
+                            imagingJobManager: imagingJobManager,
+                            workspaceDbContext: workspaceDbContext,
+                            workspaceArtifactId: currentWorkspaceArtifactId,
+                            documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId);
+                        smokeTestCollection.RunAllTests();
+>>>>>>> bdec342a7ff8da0af805822b2d1e9cd7ad8a6db0
                     }
                 }
             }

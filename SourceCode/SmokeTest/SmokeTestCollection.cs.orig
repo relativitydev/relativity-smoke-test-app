@@ -25,36 +25,48 @@ namespace SmokeTest
         public IProductionDataSourceManager ProductionDataSourceManager { get; set; }
         public IKeywordSearchManager KeywordSearchManager { get; set; }
         public IDocumentViewerServiceManager DocumentViewerServiceManager { get; set; }
-        public IImagingProfileManager ImagingProfileManager { get; set; }
-        public IImagingSetManager ImagingSetManager { get; set; }
-        public IImagingJobManager ImagingJobManager { get; set; }
+<<<<<<< HEAD
         public IProcessingCustodianManager ProcessingCustodianManager { get; set; }
         public IProcessingSetManager ProcessingSetManager { get; set; }
         public IProcessingDataSourceManager ProcessingDataSourceManager { get; set; }
         public IResourcePoolManager ResourcePoolManager { get; set; }
         public IProcessingJobManager ProcessingJobManager { get; set; }
+=======
+        public IImagingProfileManager ImagingProfileManager { get; set; }
+        public IImagingSetManager ImagingSetManager { get; set; }
+        public IImagingJobManager ImagingJobManager { get; set; }
+>>>>>>> bdec342a7ff8da0af805822b2d1e9cd7ad8a6db0
         public IDBContext WorkspaceDbContext { get; set; }
         public int WorkspaceArtifactId { get; set; }
         public int DocumentIdentifierFieldArtifactId { get; set; }
 
         public SmokeTestCollection(IRSAPIClient rsapiClient, IAgentManager agentManager, IProductionManager productionManager,
-            IProductionDataSourceManager productionDataSourceManager, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolManager, IProcessingJobManager processingJobManager,
-            IKeywordSearchManager keywordSearchManager, IDocumentViewerServiceManager documentViewerServiceManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, IDBContext workspaceDbContext, int workspaceArtifactId, int documentIdentifierFieldArtifactId)
+<<<<<<< HEAD
+        IProductionDataSourceManager productionDataSourceManager, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolManager, IProcessingJobManager processingJobManager,
+        IKeywordSearchManager keywordSearchManager, IDocumentViewerServiceManager documentViewerServiceManager, IDBContext workspaceDbContext, int workspaceArtifactId, int documentIdentifierFieldArtifactId)
+=======
+        IProductionDataSourceManager productionDataSourceManager,
+        IKeywordSearchManager keywordSearchManager, IDocumentViewerServiceManager documentViewerServiceManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, IDBContext workspaceDbContext, int workspaceArtifactId, int documentIdentifierFieldArtifactId)
+>>>>>>> bdec342a7ff8da0af805822b2d1e9cd7ad8a6db0
         {
             RsapiClient = rsapiClient;
             AgentManager = agentManager;
             ProductionManager = productionManager;
             ProductionDataSourceManager = productionDataSourceManager;
             KeywordSearchManager = keywordSearchManager;
+<<<<<<< HEAD
             DocumentViewerServiceManager = documentViewerServiceManager;
             ProcessingCustodianManager = processingCustodianManager;
-            ProcessingDataSourceManager = processingDataSourceManager;
             ProcessingSetManager = processingSetManager;
+            ProcessingDataSourceManager = processingDataSourceManager;
+            ResourcePoolManager = resourcePoolManager;
+            ProcessingJobManager = processingJobManager;
+=======
+            DocumentViewerServiceManager = documentViewerServiceManager; ;
             ImagingProfileManager = imagingProfileManager;
             ImagingSetManager = imagingSetManager;
             ImagingJobManager = imagingJobManager;
-            ResourcePoolManager = resourcePoolManager;
-            ProcessingJobManager = processingJobManager;
+>>>>>>> bdec342a7ff8da0af805822b2d1e9cd7ad8a6db0
             WorkspaceDbContext = workspaceDbContext;
             WorkspaceArtifactId = workspaceArtifactId;
             DocumentIdentifierFieldArtifactId = documentIdentifierFieldArtifactId;
@@ -64,15 +76,26 @@ namespace SmokeTest
         {
             // Order of tests is import because documents have to be imaged first before running conversion and production tests.
             IRdoHelper rdoHelper = new RdoHelper();
+<<<<<<< HEAD
+            //CheckAndRunTest("FieldTest", rdoHelper, FieldTest);
+            //CheckAndRunTest("GroupTest", rdoHelper, GroupTest);
+            //CheckAndRunTest("UserTest", rdoHelper, UserTest);
+            //CheckAndRunTest("WorkspaceTest", rdoHelper, WorkspaceTest);
+            //CheckAndRunTest("AgentTest", rdoHelper, AgentTest);
+            //CheckAndRunTest("ImageDocumentsTest", rdoHelper, ImageTest);
+            //CheckAndRunTest("DocumentConversionTest", rdoHelper, ViewerTest);
+            //CheckAndRunTest("ProductionTest", rdoHelper, ProductionTest);
+            CheckAndRunTest("ProcessingTest", rdoHelper, ProcessingTest);
+=======
             CheckAndRunTest("FieldTest", rdoHelper, FieldTest);
             CheckAndRunTest("GroupTest", rdoHelper, GroupTest);
             CheckAndRunTest("UserTest", rdoHelper, UserTest);
-            CheckAndRunTest("WorkspaceTest", rdoHelper, WorkspaceTest);
             CheckAndRunTest("AgentTest", rdoHelper, AgentTest);
-            CheckAndRunTest("ProductionTest", rdoHelper, ProductionTest);
+            CheckAndRunTest("WorkspaceTest", rdoHelper, WorkspaceTest);
             CheckAndRunTest("ImageTest", rdoHelper, ImageTest);
             CheckAndRunTest("ConversionTest", rdoHelper, ConversionTest);
-            CheckAndRunTest("ProcessingTest", rdoHelper, ProcessingTest);
+            CheckAndRunTest("ProductionTest", rdoHelper, ProductionTest);
+>>>>>>> bdec342a7ff8da0af805822b2d1e9cd7ad8a6db0
         }
 
         private void CheckAndRunTest(string testName, IRdoHelper rdoHelper, Func<ResultModel> testMethodName)
@@ -260,11 +283,28 @@ namespace SmokeTest
             }
             return productionResultModel;
         }
+<<<<<<< HEAD
+
+        public ResultModel ImageTest()
+        {
+            IImageHelper imageHelper = new ImageHelper();
+            ResultModel imageResultModel = imageHelper.ImageDocuments(RsapiClient, WorkspaceArtifactId);
+            return imageResultModel;
+        }
+
+        public ResultModel ViewerTest()
+        {
+            IViewerHelper viewerHelper = new ViewerHelper();
+            ResultModel imageResultModel = viewerHelper.ConvertDocumentsForViewer(RsapiClient, DocumentViewerServiceManager, WorkspaceDbContext, WorkspaceArtifactId);
+            return imageResultModel;
+        }
 
         public ResultModel ProcessingTest()
         {
             var processingHelper = new ProcessingHelper(RsapiClient, ProcessingCustodianManager, ProcessingSetManager, ProcessingDataSourceManager, ResourcePoolManager, ProcessingJobManager);
             return processingHelper.CreateAndRunProcessingSet(WorkspaceArtifactId);
         }
+=======
+>>>>>>> bdec342a7ff8da0af805822b2d1e9cd7ad8a6db0
     }
 }

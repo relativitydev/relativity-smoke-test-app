@@ -4,6 +4,7 @@ using NUnit.Framework;
 using Relativity.API;
 using Relativity.DocumentViewer.Services;
 using Relativity.Processing.Services;
+using Relativity.Imaging.Services.Interfaces;
 using Relativity.Productions.Services;
 using Relativity.Services.Agent;
 using Relativity.Services.ResourcePool;
@@ -14,7 +15,7 @@ using SmokeTest.Models;
 namespace SmokeTest.Tests
 {
     [TestFixture]
-    public class RsapiTestsNunit
+    public class SmokeTestCollectionTest
     {
         public SmokeTestCollection Sut { get; set; }
         public ServiceFactory ServiceFactory { get; set; }
@@ -23,6 +24,10 @@ namespace SmokeTest.Tests
         public IProductionManager ProductionManager { get; set; }
         public IProductionDataSourceManager ProductionDataSourceManager { get; set; }
         public IKeywordSearchManager KeywordSearchManager { get; set; }
+        public IDocumentViewerServiceManager DocumentViewerServiceManager { get; set; }
+        public IImagingProfileManager ImagingProfileManager { get; set; }
+        public IImagingSetManager ImagingSetManager { get; set; }
+        public IImagingJobManager ImagingJobManager { get; set; }
         public IProcessingCustodianManager ProcessingCustodianManager { get; set; }
         public IProcessingSetManager ProcessingSetManager { get; set; }
         public IProcessingDataSourceManager ProcessingDataSourceManager { get; set; }
@@ -39,11 +44,11 @@ namespace SmokeTest.Tests
             ProductionDataSourceManager = ServiceFactory.CreateProxy<IProductionDataSourceManager>();
             KeywordSearchManager = ServiceFactory.CreateProxy<IKeywordSearchManager>();
             ProcessingCustodianManager = ServiceFactory.CreateProxy<IProcessingCustodianManager>();
+            DocumentViewerServiceManager = ServiceFactory.CreateProxy<IDocumentViewerServiceManager>();
             ProcessingSetManager = ServiceFactory.CreateProxy<IProcessingSetManager>();
             ProcessingDataSourceManager = ServiceFactory.CreateProxy<IProcessingDataSourceManager>();
             ResourcePoolManager = ServiceFactory.CreateProxy<IResourcePoolManager>();
             ProcessingJobManager = ServiceFactory.CreateProxy<IProcessingJobManager>();
-            IDocumentViewerServiceManager documentViewerServiceManager = ServiceFactory.CreateProxy<IDocumentViewerServiceManager>();
             IDBContext workspaceDbContext = new DBContext(new Context("serverName", "databaseName", "sqlServerUsername", "sqlServerPassword"));
 
             int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(Constants.WorkspaceArtifactId);
@@ -53,12 +58,15 @@ namespace SmokeTest.Tests
                 productionManager: ProductionManager,
                 productionDataSourceManager: ProductionDataSourceManager,
                 keywordSearchManager: KeywordSearchManager,
+                documentViewerServiceManager: DocumentViewerServiceManager,
+                imagingProfileManager: ImagingProfileManager,
+                imagingSetManager: ImagingSetManager,
+                imagingJobManager: ImagingJobManager,
                 processingCustodianManager: ProcessingCustodianManager,
                 processingSetManager: ProcessingSetManager,
                 processingDataSourceManager: ProcessingDataSourceManager,
                 resourcePoolManager: ResourcePoolManager,
                 processingJobManager: ProcessingJobManager,
-                documentViewerServiceManager: documentViewerServiceManager,
                 workspaceDbContext: workspaceDbContext,
                 workspaceArtifactId: Constants.WorkspaceArtifactId,
                 documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId);
