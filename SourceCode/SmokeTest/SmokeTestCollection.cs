@@ -10,6 +10,8 @@ using SmokeTest.Interfaces;
 using SmokeTest.Models;
 using System;
 using System.Collections.Generic;
+using Relativity.Processing.Services;
+using Relativity.Services.ResourcePool;
 using IAgentHelper = SmokeTest.Interfaces.IAgentHelper;
 
 namespace SmokeTest
@@ -22,12 +24,17 @@ namespace SmokeTest
         public IProductionDataSourceManager ProductionDataSourceManager { get; set; }
         public IKeywordSearchManager KeywordSearchManager { get; set; }
         public IDocumentViewerServiceManager DocumentViewerServiceManager { get; set; }
+        public IProcessingCustodianManager ProcessingCustodianManager { get; set; }
+        public IProcessingSetManager ProcessingSetManager { get; set; }
+        public IProcessingDataSourceManager ProcessingDataSourceManager { get; set; }
+        public IResourcePoolManager ResourcePoolManager { get; set; }
+        public IProcessingJobManager ProcessingJobManager { get; set; }
         public IDBContext WorkspaceDbContext { get; set; }
         public int WorkspaceArtifactId { get; set; }
         public int DocumentIdentifierFieldArtifactId { get; set; }
 
         public SmokeTestCollection(IRSAPIClient rsapiClient, IAgentManager agentManager, IProductionManager productionManager,
-        IProductionDataSourceManager productionDataSourceManager,
+        IProductionDataSourceManager productionDataSourceManager, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolManager, IProcessingJobManager processingJobManager,
         IKeywordSearchManager keywordSearchManager, IDocumentViewerServiceManager documentViewerServiceManager, IDBContext workspaceDbContext, int workspaceArtifactId, int documentIdentifierFieldArtifactId)
         {
             RsapiClient = rsapiClient;
@@ -36,6 +43,11 @@ namespace SmokeTest
             ProductionDataSourceManager = productionDataSourceManager;
             KeywordSearchManager = keywordSearchManager;
             DocumentViewerServiceManager = documentViewerServiceManager;
+            ProcessingCustodianManager = processingCustodianManager;
+            ProcessingSetManager = processingSetManager;
+            ProcessingDataSourceManager = processingDataSourceManager;
+            ResourcePoolManager = resourcePoolManager;
+            ProcessingJobManager = processingJobManager;
             WorkspaceDbContext = workspaceDbContext;
             WorkspaceArtifactId = workspaceArtifactId;
             DocumentIdentifierFieldArtifactId = documentIdentifierFieldArtifactId;
@@ -45,14 +57,15 @@ namespace SmokeTest
         {
             // Order of tests is import because documents have to be imaged first before running conversion and production tests.
             IRdoHelper rdoHelper = new RdoHelper();
-            CheckAndRunTest("FieldTest", rdoHelper, FieldTest);
-            CheckAndRunTest("GroupTest", rdoHelper, GroupTest);
-            CheckAndRunTest("UserTest", rdoHelper, UserTest);
-            CheckAndRunTest("WorkspaceTest", rdoHelper, WorkspaceTest);
-            CheckAndRunTest("AgentTest", rdoHelper, AgentTest);
-            CheckAndRunTest("ImageDocumentsTest", rdoHelper, ImageTest);
-            CheckAndRunTest("DocumentConversionTest", rdoHelper, ViewerTest);
-            CheckAndRunTest("ProductionTest", rdoHelper, ProductionTest);
+            //CheckAndRunTest("FieldTest", rdoHelper, FieldTest);
+            //CheckAndRunTest("GroupTest", rdoHelper, GroupTest);
+            //CheckAndRunTest("UserTest", rdoHelper, UserTest);
+            //CheckAndRunTest("WorkspaceTest", rdoHelper, WorkspaceTest);
+            //CheckAndRunTest("AgentTest", rdoHelper, AgentTest);
+            //CheckAndRunTest("ImageDocumentsTest", rdoHelper, ImageTest);
+            //CheckAndRunTest("DocumentConversionTest", rdoHelper, ViewerTest);
+            //CheckAndRunTest("ProductionTest", rdoHelper, ProductionTest);
+            CheckAndRunTest("ProcessingTest", rdoHelper, ProcessingTest);
         }
 
         private void CheckAndRunTest(string testName, IRdoHelper rdoHelper, Func<ResultModel> testMethodName)
@@ -239,6 +252,12 @@ namespace SmokeTest
             IViewerHelper viewerHelper = new ViewerHelper();
             ResultModel imageResultModel = viewerHelper.ConvertDocumentsForViewer(RsapiClient, DocumentViewerServiceManager, WorkspaceDbContext, WorkspaceArtifactId);
             return imageResultModel;
+        }
+
+        public ResultModel ProcessingTest()
+        {
+            var processingHelper = new ProcessingHelper(RsapiClient, ProcessingCustodianManager, ProcessingSetManager, ProcessingDataSourceManager, ResourcePoolManager, ProcessingJobManager);
+            return processingHelper.CreateAndRunProcessingSet(WorkspaceArtifactId);
         }
     }
 }

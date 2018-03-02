@@ -11,6 +11,9 @@ namespace SmokeTest
         public const string BasicDefaultimagingProfileName = "Basic Default";
         public const string AllDocumentsSavedSearchName = "All Documents";
 
+        public const int NumberOfTextFilesToCreate = 10;
+        public const String ProcessingLoadFilePath = "C:\\Program Files\\kCura Corporation\\Relativity\\Licenses\\jQuery";
+
         public class TestResultsStatus
         {
             public static readonly string Success = "Success";
@@ -22,6 +25,7 @@ namespace SmokeTest
             public class Application
             {
                 public static readonly Guid SmokeTest = new Guid("0125C8D4-8354-4D8F-B031-01E73C866C7C");
+                public static readonly Guid Processing = new Guid("ED0E23F9-DA60-4298-AF9A-AE6A9B6A9319");
             }
 
             public class ObjectType
@@ -30,6 +34,10 @@ namespace SmokeTest
                 public static readonly Guid ImagingProfile = new Guid("C6FAC105-3493-4551-B956-4757066E622F");
                 public static readonly Guid ImagingSet = new Guid("BA574E88-7408-4434-A688-2324ECFC769E");
                 public static readonly Guid ImagingSetScheduler = new Guid("45C9FEB9-43D8-43FE-A216-85B1F062B0A7");
+                public static readonly Guid ProcessingProfile = new Guid("4BE0A8E2-C236-4DAC-B8DF-E7944B84CEE5");
+                public static readonly Guid RelaticityTimeZone = new Guid("BC411C4D-285A-466B-8824-E084FD981F8B");
+                public static readonly Guid ProcessingSet = new Guid("45B1F80D-C4E7-4A8D-A72A-ED9E21F89900");
+                public static readonly Guid Custodian = new Guid("D216472D-A1AA-4965-8B36-367D43D4E64C");
             }
 
             public class Fields
@@ -60,6 +68,17 @@ namespace SmokeTest
                     public static readonly Guid LockImagesForQc = new Guid("11FDD822-CE72-4540-BEF9-78D9E7B8A673");
                     public static readonly Guid NextRun = new Guid("284C4AD2-A4CA-4415-9247-09618C68D0AD");
                 }
+
+                public class ProcessingProfile
+                {
+                    public static Guid DeNist = new Guid("04AB3BCA-1A74-4541-92CA-FD6F6D741EEA");
+                }
+
+                public class ProcessingSet
+                {
+                    public static Guid Discover_Status = new Guid("513DD373-661B-4EA5-9AC4-43BEA2F793EE");
+                    public static Guid Publish_Status = new Guid("E3343C3E-0FFA-4846-B4D3-CB1E5A37140C");
+                }
             }
 
             public class Choices
@@ -74,12 +93,32 @@ namespace SmokeTest
                     public static readonly Guid Friday = new Guid("7F6F9F4E-A76B-4202-A7A1-643168C799CA");
                     public static readonly Guid Saturday = new Guid("C7E2341D-9AF6-4925-AA00-695678979EA1");
                 }
+
+                public class Processing
+                {
+                    public class DiscoverStatus
+                    {
+                        public static readonly Guid Completed = new Guid("BE180E9D-8ABF-41F8-8507-37BD1D22F72E");
+                        public static readonly Guid CompletedWithErrors = new Guid("F29B76D6-927F-4172-BC7A-92EB7B7328C9");
+                    }
+                    public class PublishStatus
+                    {
+                        public static readonly Guid Completed = new Guid("2682816F-2683-4CC0-BE6E-583FBDFF304B");
+                        public static readonly Guid CompletedWithErrors = new Guid("410C43FD-8A90-4E64-A5AF-5E4CDCFB99A7");
+                    }
+                }
             }
         }
 
         public class ImagingSetStatus
         {
             public const string Completed = "Completed";
+        }
+
+        public enum ProcessingJobType
+        {
+            Discover,
+            Publish
         }
     }
 }

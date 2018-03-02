@@ -3,8 +3,10 @@ using kCura.Relativity.Client;
 using NUnit.Framework;
 using Relativity.API;
 using Relativity.DocumentViewer.Services;
+using Relativity.Processing.Services;
 using Relativity.Productions.Services;
 using Relativity.Services.Agent;
+using Relativity.Services.ResourcePool;
 using Relativity.Services.Search;
 using Relativity.Services.ServiceProxy;
 using SmokeTest.Models;
@@ -21,6 +23,11 @@ namespace SmokeTest.Tests
         public IProductionManager ProductionManager { get; set; }
         public IProductionDataSourceManager ProductionDataSourceManager { get; set; }
         public IKeywordSearchManager KeywordSearchManager { get; set; }
+        public IProcessingCustodianManager ProcessingCustodianManager { get; set; }
+        public IProcessingSetManager ProcessingSetManager { get; set; }
+        public IProcessingDataSourceManager ProcessingDataSourceManager { get; set; }
+        public IResourcePoolManager ResourcePoolManager { get; set; }
+        public IProcessingJobManager ProcessingJobManager { get; set; }
 
         [SetUp]
         public void SetUp()
@@ -31,6 +38,11 @@ namespace SmokeTest.Tests
             ProductionManager = ServiceFactory.CreateProxy<IProductionManager>();
             ProductionDataSourceManager = ServiceFactory.CreateProxy<IProductionDataSourceManager>();
             KeywordSearchManager = ServiceFactory.CreateProxy<IKeywordSearchManager>();
+            ProcessingCustodianManager = ServiceFactory.CreateProxy<IProcessingCustodianManager>();
+            ProcessingSetManager = ServiceFactory.CreateProxy<IProcessingSetManager>();
+            ProcessingDataSourceManager = ServiceFactory.CreateProxy<IProcessingDataSourceManager>();
+            ResourcePoolManager = ServiceFactory.CreateProxy<IResourcePoolManager>();
+            ProcessingJobManager = ServiceFactory.CreateProxy<IProcessingJobManager>();
             IDocumentViewerServiceManager documentViewerServiceManager = ServiceFactory.CreateProxy<IDocumentViewerServiceManager>();
             IDBContext workspaceDbContext = new DBContext(new Context("serverName", "databaseName", "sqlServerUsername", "sqlServerPassword"));
 
@@ -41,6 +53,11 @@ namespace SmokeTest.Tests
                 productionManager: ProductionManager,
                 productionDataSourceManager: ProductionDataSourceManager,
                 keywordSearchManager: KeywordSearchManager,
+                processingCustodianManager: ProcessingCustodianManager,
+                processingSetManager: ProcessingSetManager,
+                processingDataSourceManager: ProcessingDataSourceManager,
+                resourcePoolManager: ResourcePoolManager,
+                processingJobManager: ProcessingJobManager,
                 documentViewerServiceManager: documentViewerServiceManager,
                 workspaceDbContext: workspaceDbContext,
                 workspaceArtifactId: Constants.WorkspaceArtifactId,

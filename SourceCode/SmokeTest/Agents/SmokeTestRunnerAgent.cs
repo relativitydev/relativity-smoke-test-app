@@ -9,6 +9,8 @@ using SmokeTest.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using Relativity.Processing.Services;
+using Relativity.Services.ResourcePool;
 
 namespace SmokeTest.Agents
 {
@@ -16,8 +18,11 @@ namespace SmokeTest.Agents
     [System.Runtime.InteropServices.Guid("D41F2DB7-8803-4E4F-B63B-CC7DB3CE99C8")]
     public class SmokeTestRunnerAgent : kCura.Agent.AgentBase
     {
+        private IAPILog _logger;
+
         public override void Execute()
         {
+            _logger = Helper.GetLoggerFactory().GetLogger();
             try
             {
                 ExecutionIdentity systemExecutionIdentity = ExecutionIdentity.System;
@@ -27,6 +32,11 @@ namespace SmokeTest.Agents
                 IProductionDataSourceManager productionDataSourceManager = Helper.GetServicesManager().CreateProxy<IProductionDataSourceManager>(systemExecutionIdentity);
                 IKeywordSearchManager keywordSearchManager = Helper.GetServicesManager().CreateProxy<IKeywordSearchManager>(systemExecutionIdentity);
                 IDocumentViewerServiceManager documentViewerServiceManager = Helper.GetServicesManager().CreateProxy<IDocumentViewerServiceManager>(systemExecutionIdentity);
+                IProcessingCustodianManager processingCustodianManager = Helper.GetServicesManager().CreateProxy<IProcessingCustodianManager>(systemExecutionIdentity);
+                IProcessingSetManager processingSetManager = Helper.GetServicesManager().CreateProxy<IProcessingSetManager>(systemExecutionIdentity);
+                IProcessingDataSourceManager processingDataSourceManager = Helper.GetServicesManager().CreateProxy<IProcessingDataSourceManager>(systemExecutionIdentity);
+                IResourcePoolManager resourcePoolManager = Helper.GetServicesManager().CreateProxy<IResourcePoolManager>(systemExecutionIdentity);
+                IProcessingJobManager processingJobManager = Helper.GetServicesManager().CreateProxy<IProcessingJobManager>(systemExecutionIdentity);
                 IDBContext eddsDbContext = Helper.GetDBContext(-1);
                 List<int> workspaceArtifactIds = RetrieveAllApplicationWorkspaces(eddsDbContext, Constants.Guids.Application.SmokeTest);
 
@@ -34,19 +44,46 @@ namespace SmokeTest.Agents
                 {
                     if (currentWorkspaceArtifactId != -1)
                     {
-                        IDBContext workspaceDbContext = Helper.GetDBContext(currentWorkspaceArtifactId);
-                        int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(workspaceDbContext, currentWorkspaceArtifactId);
-                        SmokeTestCollection smokeTestCollection = new SmokeTestCollection(
-                            rsapiClient: rsapiClient,
-                            agentManager: agentManager,
-                            productionManager: productionManager,
-                            productionDataSourceManager: productionDataSourceManager,
-                            keywordSearchManager: keywordSearchManager,
-                            documentViewerServiceManager: documentViewerServiceManager,
-                            workspaceDbContext: workspaceDbContext,
-                            workspaceArtifactId: currentWorkspaceArtifactId,
-                            documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId);
-                        smokeTestCollection.RunAllTests();
+                        try
+                        {
+                            IDBContext workspaceDbContext = Helper.GetDBContext(currentWorkspaceArtifactId);
+                            int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(workspaceDbContext, currentWorkspaceArtifactId);
+                            SmokeTestCollection smokeTestCollection = new SmokeTestCollection(
+                                rsapiClient: rsapiClient,
+                                agentManager: agentManager,
+                                productionManager: productionManager,
+                                productionDataSourceManager: productionDataSourceManager,
+                                keywordSearchManager: keywordSearchManager,
+                                documentViewerServiceManager: documentViewerServiceManager,
+                                processingCustodianManager: processingCustodianManager,
+                                processingSetManager: processingSetManager,
+                                processingDataSourceManager: processingDataSourceManager,
+                                resourcePoolManager: resourcePoolManager,
+                                processingJobManager: processingJobManager,
+                                workspaceDbContext: workspaceDbContext,
+                                workspaceArtifactId: currentWorkspaceArtifactId,
+                                documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId);
+                            smokeTestCollection.RunAllTests();
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Smoke Test Runner Agent");
+                        }
+                        finally
+                        {
+                            rsapiClient?.Dispose();
+                            agentManager?.Dispose();
+                            productionManager?.Dispose();
+                            productionDataSourceManager?.Dispose();
+                            keywordSearchManager?.Dispose();
+                            documentViewerServiceManager?.Dispose();
+                            processingCustodianManager?.Dispose();
+                            processingSetManager?.Dispose();
+                            processingDataSourceManager?.Dispose();
+                            resourcePoolManager?.Dispose();
+                            processingJobManager?.Dispose();
+                        }
+                        
                     }
                 }
             }
