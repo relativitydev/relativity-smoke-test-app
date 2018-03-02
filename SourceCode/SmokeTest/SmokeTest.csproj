@@ -46,6 +46,9 @@
     <Reference Include="Relativity.DocumentViewer.Services.Interfaces">
       <HintPath>..\Assemblies\Relativity.DocumentViewer.Services.Interfaces.dll</HintPath>
     </Reference>
+    <Reference Include="Relativity.Imaging.Services.Interfaces">
+      <HintPath>..\Assemblies\Relativity.Imaging.Services.Interfaces.dll</HintPath>
+    </Reference>
     <Reference Include="Relativity.Kepler, Version=1.0.1.423, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.ObjectManager.9.5.370.136\lib\Relativity.Kepler.dll</HintPath>
     </Reference>

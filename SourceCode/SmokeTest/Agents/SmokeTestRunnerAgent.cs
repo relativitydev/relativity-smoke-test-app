@@ -1,6 +1,7 @@
 ﻿using kCura.Relativity.Client;
 using Relativity.API;
 using Relativity.DocumentViewer.Services;
+using Relativity.Imaging.Services.Interfaces;
 using Relativity.Productions.Services;
 using Relativity.Services.Agent;
 using Relativity.Services.Search;
@@ -27,6 +28,9 @@ namespace SmokeTest.Agents
                 IProductionDataSourceManager productionDataSourceManager = Helper.GetServicesManager().CreateProxy<IProductionDataSourceManager>(systemExecutionIdentity);
                 IKeywordSearchManager keywordSearchManager = Helper.GetServicesManager().CreateProxy<IKeywordSearchManager>(systemExecutionIdentity);
                 IDocumentViewerServiceManager documentViewerServiceManager = Helper.GetServicesManager().CreateProxy<IDocumentViewerServiceManager>(systemExecutionIdentity);
+                IImagingProfileManager imagingProfileManager = Helper.GetServicesManager().CreateProxy<IImagingProfileManager>(systemExecutionIdentity);
+                IImagingSetManager imagingSetManager = Helper.GetServicesManager().CreateProxy<IImagingSetManager>(systemExecutionIdentity);
+                IImagingJobManager imagingJobManager = Helper.GetServicesManager().CreateProxy<IImagingJobManager>(systemExecutionIdentity);
                 IDBContext eddsDbContext = Helper.GetDBContext(-1);
                 List<int> workspaceArtifactIds = RetrieveAllApplicationWorkspaces(eddsDbContext, Constants.Guids.Application.SmokeTest);
 
@@ -43,6 +47,9 @@ namespace SmokeTest.Agents
                             productionDataSourceManager: productionDataSourceManager,
                             keywordSearchManager: keywordSearchManager,
                             documentViewerServiceManager: documentViewerServiceManager,
+                            imagingProfileManager: imagingProfileManager,
+                            imagingSetManager: imagingSetManager,
+                            imagingJobManager: imagingJobManager,
                             workspaceDbContext: workspaceDbContext,
                             workspaceArtifactId: currentWorkspaceArtifactId,
                             documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId);

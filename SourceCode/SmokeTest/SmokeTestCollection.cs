@@ -1,6 +1,7 @@
 ﻿using kCura.Relativity.Client;
 using Relativity.API;
 using Relativity.DocumentViewer.Services;
+using Relativity.Imaging.Services.Interfaces;
 using Relativity.Productions.Services;
 using Relativity.Services.Agent;
 using Relativity.Services.Search;
@@ -22,20 +23,26 @@ namespace SmokeTest
         public IProductionDataSourceManager ProductionDataSourceManager { get; set; }
         public IKeywordSearchManager KeywordSearchManager { get; set; }
         public IDocumentViewerServiceManager DocumentViewerServiceManager { get; set; }
+        public IImagingProfileManager ImagingProfileManager { get; set; }
+        public IImagingSetManager ImagingSetManager { get; set; }
+        public IImagingJobManager ImagingJobManager { get; set; }
         public IDBContext WorkspaceDbContext { get; set; }
         public int WorkspaceArtifactId { get; set; }
         public int DocumentIdentifierFieldArtifactId { get; set; }
 
         public SmokeTestCollection(IRSAPIClient rsapiClient, IAgentManager agentManager, IProductionManager productionManager,
         IProductionDataSourceManager productionDataSourceManager,
-        IKeywordSearchManager keywordSearchManager, IDocumentViewerServiceManager documentViewerServiceManager, IDBContext workspaceDbContext, int workspaceArtifactId, int documentIdentifierFieldArtifactId)
+        IKeywordSearchManager keywordSearchManager, IDocumentViewerServiceManager documentViewerServiceManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, IDBContext workspaceDbContext, int workspaceArtifactId, int documentIdentifierFieldArtifactId)
         {
             RsapiClient = rsapiClient;
             AgentManager = agentManager;
             ProductionManager = productionManager;
             ProductionDataSourceManager = productionDataSourceManager;
             KeywordSearchManager = keywordSearchManager;
-            DocumentViewerServiceManager = documentViewerServiceManager;
+            DocumentViewerServiceManager = documentViewerServiceManager; ;
+            ImagingProfileManager = imagingProfileManager;
+            ImagingSetManager = imagingSetManager;
+            ImagingJobManager = imagingJobManager;
             WorkspaceDbContext = workspaceDbContext;
             WorkspaceArtifactId = workspaceArtifactId;
             DocumentIdentifierFieldArtifactId = documentIdentifierFieldArtifactId;
@@ -48,10 +55,10 @@ namespace SmokeTest
             CheckAndRunTest("FieldTest", rdoHelper, FieldTest);
             CheckAndRunTest("GroupTest", rdoHelper, GroupTest);
             CheckAndRunTest("UserTest", rdoHelper, UserTest);
-            CheckAndRunTest("WorkspaceTest", rdoHelper, WorkspaceTest);
             CheckAndRunTest("AgentTest", rdoHelper, AgentTest);
-            CheckAndRunTest("ImageDocumentsTest", rdoHelper, ImageTest);
-            CheckAndRunTest("DocumentConversionTest", rdoHelper, ViewerTest);
+            CheckAndRunTest("WorkspaceTest", rdoHelper, WorkspaceTest);
+            CheckAndRunTest("ImageTest", rdoHelper, ImageTest);
+            CheckAndRunTest("ConversionTest", rdoHelper, ConversionTest);
             CheckAndRunTest("ProductionTest", rdoHelper, ProductionTest);
         }
 
@@ -128,6 +135,27 @@ namespace SmokeTest
             return userResultModel;
         }
 
+        public ResultModel AgentTest()
+        {
+            IAgentHelper agentHelper = new AgentHelper();
+            string agentName = $"{Constants.Prefix}-{Guid.NewGuid()}";
+            int agentTypeId = agentHelper.GetAgentTypeArtifactId(AgentManager, Constants.TestAgentToCreateName);
+            int agentServer = agentHelper.GetFirstAgentServerArtifactId(AgentManager);
+            ResultModel agentResultModel = agentHelper.CreateAgent(
+                agentManager: AgentManager,
+                agentName: agentName,
+                agentTypeId: agentTypeId,
+                agentServer: agentServer,
+                enableAgent: true,
+                agentInterval: 5,
+                agentLoggingLevel: Agent.LoggingLevelEnum.All);
+            if (agentResultModel.Success)
+            {
+                agentHelper.DeleteAgent(AgentManager, agentResultModel.ArtifactId);
+            }
+            return agentResultModel;
+        }
+
         public ResultModel WorkspaceTest()
         {
             IWorkspaceHelper workspaceHelper = new WorkspaceHelper();
@@ -140,25 +168,18 @@ namespace SmokeTest
             return workspaceResultModel;
         }
 
-        public ResultModel AgentTest()
+        public ResultModel ImageTest()
         {
-            IAgentHelper agentHelper = new AgentHelper();
-            string agentName = $"{Constants.Prefix}-{Guid.NewGuid()}";
-            int agentTypeId = agentHelper.GetAgentTypeArtifactId(AgentManager, Constants.TestAgentToCreateName);
-            int agentServer = agentHelper.GetFirstAgentServerArtifactId(AgentManager);
-            ResultModel agentResultModel = agentHelper.CreateAgent(
-              agentManager: AgentManager,
-              agentName: agentName,
-              agentTypeId: agentTypeId,
-              agentServer: agentServer,
-              enableAgent: true,
-              agentInterval: 5,
-              agentLoggingLevel: Agent.LoggingLevelEnum.All);
-            if (agentResultModel.Success)
-            {
-                agentHelper.DeleteAgent(AgentManager, agentResultModel.ArtifactId);
-            }
-            return agentResultModel;
+            IImageHelper imageHelper = new ImageHelper();
+            ResultModel imageResultModel = imageHelper.ImageDocuments(RsapiClient, ImagingProfileManager, ImagingSetManager, ImagingJobManager, WorkspaceArtifactId);
+            return imageResultModel;
+        }
+
+        public ResultModel ConversionTest()
+        {
+            IViewerHelper viewerHelper = new ViewerHelper();
+            ResultModel imageResultModel = viewerHelper.ConvertDocumentsForViewer(RsapiClient, DocumentViewerServiceManager, WorkspaceDbContext, WorkspaceArtifactId);
+            return imageResultModel;
         }
 
         public ResultModel ProductionTest()
@@ -225,20 +246,6 @@ namespace SmokeTest
                 productionResultModel.ErrorMessage = ex.ToString();
             }
             return productionResultModel;
-        }
-
-        public ResultModel ImageTest()
-        {
-            IImageHelper imageHelper = new ImageHelper();
-            ResultModel imageResultModel = imageHelper.ImageDocuments(RsapiClient, WorkspaceArtifactId);
-            return imageResultModel;
-        }
-
-        public ResultModel ViewerTest()
-        {
-            IViewerHelper viewerHelper = new ViewerHelper();
-            ResultModel imageResultModel = viewerHelper.ConvertDocumentsForViewer(RsapiClient, DocumentViewerServiceManager, WorkspaceDbContext, WorkspaceArtifactId);
-            return imageResultModel;
         }
     }
 }
