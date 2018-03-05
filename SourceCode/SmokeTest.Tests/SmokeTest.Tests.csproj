@@ -54,7 +54,7 @@
       <HintPath>..\packages\Relativity.ObjectManager.9.5.370.136\lib\Relativity.Kepler.dll</HintPath>
     </Reference>
     <Reference Include="Relativity.Processing.Services.Interfaces">
-      <HintPath>..\..\..\..\Users\msmith.KCURA\Downloads\Relativity.Processing.Services.Interfaces.dll</HintPath>
+      <HintPath>..\Assemblies\Relativity.Processing.Services.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="Relativity.Productions.Services.Interfaces">
       <HintPath>..\Assemblies\Relativity.Productions.Services.Interfaces.dll</HintPath>
