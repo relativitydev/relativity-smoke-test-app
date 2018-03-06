@@ -2,16 +2,16 @@
 using Relativity.API;
 using Relativity.DocumentViewer.Services;
 using Relativity.Imaging.Services.Interfaces;
+using Relativity.Processing.Services;
 using Relativity.Productions.Services;
 using Relativity.Services.Agent;
+using Relativity.Services.ResourcePool;
 using Relativity.Services.Search;
 using SmokeTest.Exceptions;
 using SmokeTest.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using Relativity.Processing.Services;
-using Relativity.Services.ResourcePool;
 
 namespace SmokeTest.Agents
 {
@@ -50,6 +50,7 @@ namespace SmokeTest.Agents
                     {
                         try
                         {
+                            RaiseMessage($"Running Smoke tests in Workspace [{currentWorkspaceArtifactId}]", 1);
                             IDBContext workspaceDbContext = Helper.GetDBContext(currentWorkspaceArtifactId);
                             int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(workspaceDbContext, currentWorkspaceArtifactId);
                             SmokeTestCollection smokeTestCollection = new SmokeTestCollection(
@@ -70,7 +71,7 @@ namespace SmokeTest.Agents
                                 workspaceDbContext: workspaceDbContext,
                                 workspaceArtifactId: currentWorkspaceArtifactId,
                                 documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId);
-                            smokeTestCollection.RunAllTests();
+                            smokeTestCollection.Run();
                         }
                         catch (Exception ex)
                         {
@@ -78,6 +79,7 @@ namespace SmokeTest.Agents
                         }
                         finally
                         {
+                            RaiseMessage($"Finished running Smoke tests in Workspace [{currentWorkspaceArtifactId}]", 1);
                             rsapiClient?.Dispose();
                             agentManager?.Dispose();
                             productionManager?.Dispose();
@@ -93,7 +95,6 @@ namespace SmokeTest.Agents
                             imagingSetManager?.Dispose();
                             imagingJobManager?.Dispose();
                         }
-                        
                     }
                 }
             }

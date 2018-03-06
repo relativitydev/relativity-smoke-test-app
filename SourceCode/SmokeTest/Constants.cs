@@ -5,6 +5,7 @@ namespace SmokeTest
     public class Constants
     {
         public const string SmokeTestRunnerAgentName = "Smoke Test Runner Agent";
+        public const string SmokeTestAnalysisAgentName = "Smoke Test Analysis Agent";
         public const string TestAgentToCreateName = "Dummy Agent";
         public static readonly string Prefix = "ST";
         public static readonly int GroupIdentifierFieldArtifactId = 1003671;
@@ -13,10 +14,15 @@ namespace SmokeTest
         public const int NumberOfTextFilesToCreate = 10;
         public const String ProcessingLoadFilePath = "C:\\Program Files\\kCura Corporation\\Relativity\\Licenses\\jQuery";
 
-        public class TestResultsStatus
+        public class Status
         {
-            public static readonly string Success = "Success";
-            public static readonly string Fail = "Fail";
+            public class TestRdo
+            {
+                public static readonly string New = "New";
+                public static readonly string RunningTest = "Running Test";
+                public static readonly string Success = "Success";
+                public static readonly string Fail = "Fail";
+            }
         }
 
         public class Guids
@@ -42,8 +48,10 @@ namespace SmokeTest
                 {
                     public static readonly Guid ArtifactId = new Guid("FB785856-785C-4E42-9772-6F69A4ED3119");
                     public static readonly Guid Name = new Guid("9D9F70EF-0AB1-4912-849E-418976EA92CF");
-                    public static readonly Guid Result = new Guid("A057E0A2-73CE-44B1-AF8D-F8B896358446");
-                    public static readonly Guid ErrorMessage = new Guid("D289FEAA-76F4-4E82-86D6-E2E522F42A71");
+                    public static readonly Guid Status = new Guid("A057E0A2-73CE-44B1-AF8D-F8B896358446");
+                    public static readonly Guid Error = new Guid("D289FEAA-76F4-4E82-86D6-E2E522F42A71");
+                    public static readonly Guid ErrorDetails = new Guid("F615298C-EB1E-4892-B8AA-103CEE85888B");
+                    public static readonly Guid SystemLastModifiedOn = new Guid("E82F7D31-E05F-4D3F-8D7D-9A39097AC01E");
                 }
 
                 public class ProcessingProfile
@@ -53,8 +61,8 @@ namespace SmokeTest
 
                 public class ProcessingSet
                 {
-                    public static Guid Discover_Status = new Guid("513DD373-661B-4EA5-9AC4-43BEA2F793EE");
-                    public static Guid Publish_Status = new Guid("E3343C3E-0FFA-4846-B4D3-CB1E5A37140C");
+                    public static Guid DiscoverStatus = new Guid("513DD373-661B-4EA5-9AC4-43BEA2F793EE");
+                    public static Guid PublishStatus = new Guid("E3343C3E-0FFA-4846-B4D3-CB1E5A37140C");
                 }
             }
 

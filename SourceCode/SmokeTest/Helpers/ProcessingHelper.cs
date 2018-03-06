@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using kCura.Relativity.Client;
+﻿using kCura.Relativity.Client;
 using kCura.Relativity.Client.DTOs;
 using Relativity.Processing.Services;
 using Relativity.Services;
 using Relativity.Services.ResourcePool;
 using SmokeTest.Exceptions;
 using SmokeTest.Models;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
 using RelativityApplication = kCura.Relativity.Client.DTOs.RelativityApplication;
 
 namespace SmokeTest.Helpers
@@ -116,7 +114,7 @@ namespace SmokeTest.Helpers
                 retVal.ErrorMessage = $@"Error running Processing Set Test: {ex.ToString()}";
                 retVal.Success = false;
             }
-            
+
             return retVal;
         }
 
@@ -147,7 +145,7 @@ namespace SmokeTest.Helpers
             {
                 throw new SmokeTestException("Error creating/querying Custodians", e);
             }
-            
+
 
             return retVal;
         }
@@ -210,7 +208,7 @@ namespace SmokeTest.Helpers
                 var results = RsapiClient.Repositories.RDO.Query(query);
                 if (!results.Success)
                 {
-                    throw new Exception(results.Message);
+                    throw new SmokeTestException(results.Message);
                 }
                 return results.Results[0].Artifact.ArtifactID;
             }
@@ -218,7 +216,7 @@ namespace SmokeTest.Helpers
             {
                 throw new SmokeTestException($@"Error getting Time Zone ArtifactID {e.ToString()}");
             }
-            
+
         }
 
         private int GetDefaultFolderArtifactId(int workspaceId)
@@ -233,7 +231,7 @@ namespace SmokeTest.Helpers
                 var results = RsapiClient.Repositories.RDO.Query(query);
                 if (!results.Success)
                 {
-                    throw new Exception(results.Message);
+                    throw new SmokeTestException(results.Message);
                 }
                 return results.Results[0].Artifact.ArtifactID;
             }
@@ -241,7 +239,7 @@ namespace SmokeTest.Helpers
             {
                 throw new SmokeTestException($@"Unable to get the default folder artifactID: {e.ToString()}");
             }
-            
+
         }
 
         private void DisableNist(int workspaceId, int processingProfileId)
@@ -304,7 +302,7 @@ namespace SmokeTest.Helpers
             {
                 throw new SmokeTestException($@"Error finding Processing Source Location: {e.ToString()}");
             }
-            
+
         }
 
         private void CreateRandomTextFiles(string path, int numberOfFilesToCreate)
@@ -323,7 +321,7 @@ namespace SmokeTest.Helpers
             {
                 throw new SmokeTestException($@"Error Creating random text files for procssing {e.ToString()}");
             }
-            
+
         }
 
 
@@ -350,7 +348,7 @@ namespace SmokeTest.Helpers
             {
                 throw new SmokeTestException($@"Error creating Procssing Data Source: {e.ToString()}");
             }
-            
+
         }
 
         private void SubmitDiscoveryJob(int workspaceId, int processingSetId)
@@ -369,7 +367,7 @@ namespace SmokeTest.Helpers
             {
                 throw new SmokeTestException($@"Error Submitting Discovery Job: {e.ToString()}");
             }
-            
+
         }
 
         private bool JobCompletedSuccessfully(int workspaceId, int processingSetId, int maxWaitInMinutes, Constants.ProcessingJobType jobtype)
@@ -382,11 +380,11 @@ namespace SmokeTest.Helpers
             Guid fieldGuid;
             if (jobtype == Constants.ProcessingJobType.Discover)
             {
-                fieldGuid = Constants.Guids.Fields.ProcessingSet.Discover_Status;
+                fieldGuid = Constants.Guids.Fields.ProcessingSet.DiscoverStatus;
             }
             else
             {
-                fieldGuid = Constants.Guids.Fields.ProcessingSet.Publish_Status;
+                fieldGuid = Constants.Guids.Fields.ProcessingSet.PublishStatus;
             }
 
             try
@@ -405,7 +403,7 @@ namespace SmokeTest.Helpers
             {
                 throw new SmokeTestException($@"Error Checking for {jobtype.ToString()} Job Completion: {e.ToString()}");
             }
-            
+
         }
 
         private void SubmitPublishJob(int workspaceId, int processingSetId)
@@ -424,7 +422,7 @@ namespace SmokeTest.Helpers
             {
                 throw new SmokeTestException($@"Error checking submitting publish job: {e.ToString()}");
             }
-            
+
         }
     }
 }

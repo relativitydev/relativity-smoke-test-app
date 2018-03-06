@@ -52,19 +52,19 @@ namespace SmokeTest.Helpers
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception($"{errorContext}. Query.", ex);
+                    throw new SmokeTestException($"{errorContext}. Query.", ex);
                 }
 
                 if (!savedSearchQueryResult.Success)
                 {
-                    throw new Exception($"{errorContext}. ErrorMessage = {savedSearchQueryResult.Message}");
+                    throw new SmokeTestException($"{errorContext}. ErrorMessage = {savedSearchQueryResult.Message}");
                 }
                 int savedSearchArtifactId = savedSearchQueryResult.QueryArtifacts[0].ArtifactID;
                 return savedSearchArtifactId;
             }
             catch (Exception ex)
             {
-                throw new Exception(errorContext, ex);
+                throw new SmokeTestException(errorContext, ex);
             }
         }
 

@@ -1,9 +1,12 @@
 ﻿using kCura.Relativity.Client;
+using kCura.Relativity.Client.DTOs;
 using Relativity.API;
 using Relativity.DocumentViewer.Services;
 using Relativity.Imaging.Services.Interfaces;
+using Relativity.Processing.Services;
 using Relativity.Productions.Services;
 using Relativity.Services.Agent;
+using Relativity.Services.ResourcePool;
 using Relativity.Services.Search;
 using SmokeTest.Exceptions;
 using SmokeTest.Helpers;
@@ -11,14 +14,14 @@ using SmokeTest.Interfaces;
 using SmokeTest.Models;
 using System;
 using System.Collections.Generic;
-using Relativity.Processing.Services;
-using Relativity.Services.ResourcePool;
+using System.Linq;
 using IAgentHelper = SmokeTest.Interfaces.IAgentHelper;
 
 namespace SmokeTest
 {
     public class SmokeTestCollection
     {
+        public List<SmokeTestModel> SmokeTests = new List<SmokeTestModel>();
         public IRSAPIClient RsapiClient { get; set; }
         public IAgentManager AgentManager { get; set; }
         public IProductionManager ProductionManager { get; set; }
@@ -36,6 +39,8 @@ namespace SmokeTest
         public IDBContext WorkspaceDbContext { get; set; }
         public int WorkspaceArtifactId { get; set; }
         public int DocumentIdentifierFieldArtifactId { get; set; }
+        public IRdoHelper RdoHelper { get; set; }
+
 
         public SmokeTestCollection(IRSAPIClient rsapiClient, IAgentManager agentManager, IProductionManager productionManager,
             IProductionDataSourceManager productionDataSourceManager, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolManager, IProcessingJobManager processingJobManager,
@@ -58,55 +63,102 @@ namespace SmokeTest
             WorkspaceDbContext = workspaceDbContext;
             WorkspaceArtifactId = workspaceArtifactId;
             DocumentIdentifierFieldArtifactId = documentIdentifierFieldArtifactId;
+            RdoHelper = new RdoHelper();
         }
 
-        public void RunAllTests()
+        public void Run()
+        {
+            Initialize();
+            CreateAllTests();
+            RunAllTests();
+        }
+
+        private void Initialize()
         {
             // Order of tests is import because documents have to be imaged first before running conversion and production tests.
-            IRdoHelper rdoHelper = new RdoHelper();
-            CheckAndRunTest("FieldTest", rdoHelper, FieldTest);
-            CheckAndRunTest("GroupTest", rdoHelper, GroupTest);
-            CheckAndRunTest("UserTest", rdoHelper, UserTest);
-            CheckAndRunTest("WorkspaceTest", rdoHelper, WorkspaceTest);
-            CheckAndRunTest("AgentTest", rdoHelper, AgentTest);
-            CheckAndRunTest("ProductionTest", rdoHelper, ProductionTest);
-            CheckAndRunTest("ImageTest", rdoHelper, ImageTest);
-            CheckAndRunTest("ConversionTest", rdoHelper, ConversionTest);
-            CheckAndRunTest("ProcessingTest", rdoHelper, ProcessingTest);
+            SmokeTests.Add(new SmokeTestModel(10, "Field Test", FieldTest));
+            SmokeTests.Add(new SmokeTestModel(20, "Group Test", GroupTest));
+            SmokeTests.Add(new SmokeTestModel(30, "User Test", UserTest));
+            SmokeTests.Add(new SmokeTestModel(40, "Workspace Test", WorkspaceTest));
+            SmokeTests.Add(new SmokeTestModel(50, "Agent Test", AgentTest));
+            SmokeTests.Add(new SmokeTestModel(70, "Image Test", ImageTest));
+            SmokeTests.Add(new SmokeTestModel(80, "Conversion Test", ConversionTest));
+            SmokeTests.Add(new SmokeTestModel(60, "Production Test", ProductionTest));
+            SmokeTests.Add(new SmokeTestModel(90, "Processing Test", ProcessingTest));
         }
 
-        private void CheckAndRunTest(string testName, IRdoHelper rdoHelper, Func<ResultModel> testMethodName)
+        private void CreateAllTests()
+        {
+            // Order of tests is import because documents have to be imaged first before running conversion and production tests.
+            foreach (SmokeTestModel smokeTestModel in SmokeTests.OrderBy(x => x.Order))
+            {
+                CreateTestIfItNotAlreadyExists(smokeTestModel);
+            }
+        }
+
+        private void CreateTestIfItNotAlreadyExists(SmokeTestModel smokeTestModel)
+        {
+            string errorContext = "An error occured when checking for existing test and creating a new test if it not exists.";
+            try
+            {
+                bool doesTestExists = RdoHelper.CheckIfTestRdoRecordExists(RsapiClient, WorkspaceArtifactId, smokeTestModel.Name);
+                if (!doesTestExists)
+                {
+                    // Only Create a Test if it is not already exists.
+                    RdoHelper.CreateTestRdoRecord(RsapiClient, WorkspaceArtifactId, smokeTestModel.Name, Constants.Status.TestRdo.New, string.Empty, string.Empty);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new SmokeTestException($"{errorContext}. [TestName: {smokeTestModel.Name}]", ex);
+            }
+        }
+
+        private void RunAllTests()
+        {
+            // Order of tests is import because documents have to be imaged first before running conversion and production tests.
+            foreach (SmokeTestModel smokeTestModel in SmokeTests.OrderBy(x => x.Order))
+            {
+                RunTestOnlyIfStatusIsNew(smokeTestModel);
+            }
+        }
+
+        private void RunTestOnlyIfStatusIsNew(SmokeTestModel smokeTestModel)
         {
             string errorContext = "An error occured when checking for existing test and running a new test if it not exists.";
             try
             {
-                bool doesTestExists = rdoHelper.CheckIfTestsRdoRecordExists(RsapiClient, WorkspaceArtifactId, testName);
-                if (!doesTestExists)
+                RDO testRdo = RdoHelper.RetrieveTestRdo(RsapiClient, WorkspaceArtifactId, smokeTestModel.Name);
+                string testStatus = testRdo.Fields.Get(Constants.Guids.Fields.Test.Status).ToString();
+                // Only Run a Test if its Status is New
+                if (testStatus.Equals(Constants.Status.TestRdo.New))
                 {
-                    // Only Run a Test if it is not already run.
-                    RunTest(testName, rdoHelper, testMethodName);
+                    RunTest(smokeTestModel, testRdo);
                 }
             }
             catch (Exception ex)
             {
-                throw new SmokeTestException($"{errorContext}. [TestName: {testName}]", ex);
+                throw new SmokeTestException($"{errorContext}. [TestName: {smokeTestModel.Name}]", ex);
             }
         }
 
-        private void RunTest(string testName, IRdoHelper rdoHelper, Func<ResultModel> testMethodName)
+        private void RunTest(SmokeTestModel smokeTestModel, RDO testRdo)
         {
             try
             {
-                ResultModel resultModel = testMethodName();
+                RdoHelper.UpdateTestRdoRecord(RsapiClient, WorkspaceArtifactId, testRdo.ArtifactID, null, Constants.Status.TestRdo.RunningTest, null, null);
+                ResultModel resultModel = smokeTestModel.Method();
                 if (!resultModel.Success)
                 {
-                    throw new SmokeTestException($"An error occured in {testName}. ErrorMessage: {resultModel.ErrorMessage}");
+                    throw new SmokeTestException($"An error occured in {smokeTestModel.Name}. ErrorMessage: {resultModel.ErrorMessage}");
                 }
-                rdoHelper.CreateTestsRdoRecord(RsapiClient, WorkspaceArtifactId, testName, Constants.TestResultsStatus.Success, string.Empty);
+                RdoHelper.UpdateTestRdoRecord(RsapiClient, WorkspaceArtifactId, testRdo.ArtifactID, null, Constants.Status.TestRdo.Success, null, null);
             }
             catch (Exception ex)
             {
-                rdoHelper.CreateTestsRdoRecord(RsapiClient, WorkspaceArtifactId, testName, Constants.TestResultsStatus.Fail, ex.ToString());
+                string error = ExceptionMessageFormatter.GetInnerMostExceptionMessage(ex);
+                string errorDetails = ex.ToString();
+                RdoHelper.UpdateTestRdoRecord(RsapiClient, WorkspaceArtifactId, testRdo.ArtifactID, null, Constants.Status.TestRdo.Fail, error, errorDetails);
             }
         }
 

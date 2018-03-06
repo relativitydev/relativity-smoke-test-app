@@ -106,7 +106,7 @@ namespace SmokeTest.Helpers
             }
             catch (Exception ex)
             {
-                throw new Exception($"{errorContext}", ex);
+                throw new SmokeTestException($"{errorContext}", ex);
             }
         }
 
@@ -136,13 +136,13 @@ namespace SmokeTest.Helpers
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception($"{errorContext}. SaveAsync.", ex);
+                    throw new SmokeTestException($"{errorContext}. SaveAsync.", ex);
                 }
                 return imagingProfileArtifactId;
             }
             catch (Exception ex)
             {
-                throw new Exception($"{errorContext}", ex);
+                throw new SmokeTestException($"{errorContext}", ex);
             }
         }
 
@@ -162,7 +162,7 @@ namespace SmokeTest.Helpers
                     }
                     catch (Exception ex)
                     {
-                        throw new Exception($"{errorContext}. DeleteAsync.", ex);
+                        throw new SmokeTestException($"{errorContext}. DeleteAsync.", ex);
                     }
                 }
                 else
@@ -173,7 +173,7 @@ namespace SmokeTest.Helpers
             }
             catch (Exception ex)
             {
-                throw new Exception($"{errorContext}", ex);
+                throw new SmokeTestException($"{errorContext}", ex);
             }
         }
 
@@ -191,12 +191,12 @@ namespace SmokeTest.Helpers
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception($"{errorContext}. DeleteAsync.", ex);
+                    throw new SmokeTestException($"{errorContext}. DeleteAsync.", ex);
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception($"{errorContext}", ex);
+                throw new SmokeTestException($"{errorContext}", ex);
             }
         }
 
@@ -227,13 +227,13 @@ namespace SmokeTest.Helpers
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception($"{errorContext}. SaveAsync.", ex);
+                    throw new SmokeTestException($"{errorContext}. SaveAsync.", ex);
                 }
                 return imagingSetArtifactId;
             }
             catch (Exception ex)
             {
-                throw new Exception($"{errorContext}", ex);
+                throw new SmokeTestException($"{errorContext}", ex);
             }
         }
 
@@ -253,7 +253,7 @@ namespace SmokeTest.Helpers
                     }
                     catch (Exception ex)
                     {
-                        throw new Exception($"{errorContext}. DeleteAsync.", ex);
+                        throw new SmokeTestException($"{errorContext}. DeleteAsync.", ex);
                     }
                 }
                 else
@@ -263,7 +263,7 @@ namespace SmokeTest.Helpers
             }
             catch (Exception ex)
             {
-                throw new Exception($"{errorContext}", ex);
+                throw new SmokeTestException($"{errorContext}", ex);
             }
         }
 
@@ -281,12 +281,12 @@ namespace SmokeTest.Helpers
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception($"{errorContext}. ReadAsync.", ex);
+                    throw new SmokeTestException($"{errorContext}. ReadAsync.", ex);
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception($"{errorContext}", ex);
+                throw new SmokeTestException($"{errorContext}", ex);
             }
         }
 
@@ -309,7 +309,7 @@ namespace SmokeTest.Helpers
             }
             catch (Exception ex)
             {
-                throw new Exception($"{errorContext}", ex);
+                throw new SmokeTestException($"{errorContext}", ex);
             }
         }
 
