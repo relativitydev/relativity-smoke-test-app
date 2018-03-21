@@ -31,6 +31,7 @@ namespace SmokeTest
             {
                 public static readonly Guid SmokeTest = new Guid("0125C8D4-8354-4D8F-B031-01E73C866C7C");
                 public static readonly Guid Processing = new Guid("ED0E23F9-DA60-4298-AF9A-AE6A9B6A9319");
+                public static readonly Guid DataGridCore = new Guid("6A8C2341-6888-44DA-B1A4-5BDCE0D1A383");
             }
 
             public class ObjectType

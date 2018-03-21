@@ -125,5 +125,19 @@ namespace SmokeTest.Tests
             ResultModel productionResultModel = Sut.ProductionTest();
             Assert.That(productionResultModel.Success, Is.EqualTo(true));
         }
+
+        [Test]
+        public void ProcessingTest()
+        {
+            ResultModel processingResultModel = Sut.ProcessingTest();
+            Assert.That(processingResultModel.Success, Is.EqualTo(true));
+        }
+
+        [Test]
+        public void DataGridTest()
+        {
+            ResultModel dataGridResultModel = Sut.DataGridTest();
+            Assert.That(dataGridResultModel.Success, Is.EqualTo(true));
+        }
     }
 }

@@ -85,6 +85,7 @@ namespace SmokeTest
             SmokeTests.Add(new SmokeTestModel(80, "Conversion Test", ConversionTest));
             SmokeTests.Add(new SmokeTestModel(60, "Production Test", ProductionTest));
             SmokeTests.Add(new SmokeTestModel(90, "Processing Test", ProcessingTest));
+            SmokeTests.Add(new SmokeTestModel(100, "Data Grid Test", DataGridTest));
         }
 
         private void CreateAllTests()
@@ -317,6 +318,12 @@ namespace SmokeTest
         {
             var processingHelper = new ProcessingHelper(RsapiClient, ProcessingCustodianManager, ProcessingSetManager, ProcessingDataSourceManager, ResourcePoolManager, ProcessingJobManager);
             return processingHelper.CreateAndRunProcessingSet(WorkspaceArtifactId);
+        }
+
+        public ResultModel DataGridTest()
+        {
+            var dataGridHelper = new DataGridHelper(RsapiClient);
+            return dataGridHelper.VerifyDataGridFunctionality(WorkspaceArtifactId);
         }
     }
 }

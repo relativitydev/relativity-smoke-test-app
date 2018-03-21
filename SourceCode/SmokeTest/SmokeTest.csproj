@@ -40,6 +40,10 @@
     <Reference Include="kCura.Relativity.Client, Version=9.5.370.136, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.Rsapi.9.5.370.136\lib\kCura.Relativity.Client.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Relativity.API, Version=9.5.370.136, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.Api.9.5.370.136\lib\Relativity.API.dll</HintPath>
     </Reference>
@@ -88,6 +92,7 @@
     <Compile Include="Helpers\AgentHelper.cs" />
     <Compile Include="Helpers\ChoiceHelper.cs" />
     <Compile Include="Helpers\ClientHelper.cs" />
+    <Compile Include="Helpers\DataGridHelper.cs" />
     <Compile Include="Helpers\FieldHelper.cs" />
     <Compile Include="Helpers\GroupHelper.cs" />
     <Compile Include="Helpers\ProcessingHelper.cs" />
@@ -120,6 +125,7 @@
     <Compile Include="SmokeTestCollection.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
