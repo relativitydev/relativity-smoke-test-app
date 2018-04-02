@@ -236,15 +236,63 @@ namespace SmokeTest
 
         public ResultModel ImageTest()
         {
-            IImageHelper imageHelper = new ImageHelper();
-            ResultModel imageResultModel = imageHelper.ImageDocuments(RsapiClient, ImagingProfileManager, ImagingSetManager, ImagingJobManager, WorkspaceArtifactId);
+            ResultModel imageResultModel = null;
+            try
+            {
+                IImageHelper imageHelper = new ImageHelper();
+                if (!SavedSearchHelper.DocumentsExistInWorkspace(RsapiClient, WorkspaceArtifactId))
+                {
+                    imageResultModel = new ResultModel("Image")
+                    {
+                        Success = false,
+                        ErrorMessage = "There are no documents in the workspace."
+                    };
+                }
+                else
+                {
+                    imageResultModel = imageHelper.ImageDocuments(RsapiClient, ImagingProfileManager, ImagingSetManager, ImagingJobManager, WorkspaceArtifactId);
+                }
+            }
+            catch (Exception ex)
+            {
+                imageResultModel = new ResultModel("Image")
+                {
+                    Success = false,
+                    ErrorMessage = $@"Error running Text: {ex}"
+                };
+            }
+            
             return imageResultModel;
         }
 
         public ResultModel ConversionTest()
         {
-            IViewerHelper viewerHelper = new ViewerHelper();
-            ResultModel imageResultModel = viewerHelper.ConvertDocumentsForViewer(RsapiClient, DocumentViewerServiceManager, WorkspaceDbContext, WorkspaceArtifactId);
+            ResultModel imageResultModel = null;
+            try
+            {
+                IViewerHelper viewerHelper = new ViewerHelper();
+                if (!SavedSearchHelper.DocumentsExistInWorkspace(RsapiClient, WorkspaceArtifactId))
+                {
+                    imageResultModel = new ResultModel("Viewer")
+                    {
+                        Success = false,
+                        ErrorMessage = "There are no documents in the workspace."
+                    };
+                }
+                else
+                {
+                    imageResultModel = viewerHelper.ConvertDocumentsForViewer(RsapiClient, DocumentViewerServiceManager, WorkspaceDbContext, WorkspaceArtifactId);
+                }
+            }
+            catch (Exception ex)
+            {
+                imageResultModel = new ResultModel("Viewer")
+                {
+                    Success = false,
+                    ErrorMessage = $@"Error running Text: {ex}"
+                };
+            }
+            
             return imageResultModel;
         }
 
@@ -262,48 +310,56 @@ namespace SmokeTest
                     searchName: $"ST-{Guid.NewGuid()}",
                     controlNumbers: new List<string>());
 
-                ProductionModel productionModel = new ProductionModel(
-                    workspaceArtifactId: WorkspaceArtifactId,
-                    productionName: $"Page Level - Simple - {Guid.NewGuid()}",
-                    attachmentRelationalFieldArtifactId: Constants.GroupIdentifierFieldArtifactId,
-                    batesPrefix: "ABC",
-                    batesSuffix: "XYZ",
-                    batesStartNumber: 1,
-                    numberOfDigitsForDocumentNumbering: 7,
-                    brandingFontSize: 10,
-                    scaleBrandingFont: false,
-                    emailRecipients: string.Empty,
-                    markupSetModel: new MarkupSetModel(
-                        name: $"Generic MarkupSet{DateTime.UtcNow}{DateTime.UtcNow.Millisecond}",
-                        markupSetOrder: 10,
-                        redactionText: "who cares"),
-                    productionType: ProductionType.ImagesOnly,
-                    productionDataSourceName: "Test Datasource 123",
-                    savedSearchArtifactId: savedSearchArtifactId,
-                    clientModel: new ClientModel(
-                        rsapiClient: RsapiClient,
-                        productionManager: ProductionManager,
-                        productionDataSourceManager: ProductionDataSourceManager),
-                    stagingAndProductionWaitTimeOutInSeconds: 300);
-                int productionSetArtifactId = productionHelper.CreateAndRunProductionSet(productionModel);
-                Production production = ProductionManager.ReadSingleAsync(WorkspaceArtifactId, productionSetArtifactId).Result;
-                ProductionStatus productionStatus = production.ProductionMetadata.Status;
-                int productionArtifactId = production.ArtifactID;
-
-                if (productionArtifactId > 0)
+                if (!SavedSearchHelper.DocumentsExistInWorkspace(RsapiClient, WorkspaceArtifactId))
                 {
-                    productionHelper.DeleteProductionSet(ProductionManager, WorkspaceArtifactId, productionArtifactId);
-                }
-
-                if (productionStatus == ProductionStatus.Produced)
-                {
-                    productionResultModel.Success = true;
-                    productionResultModel.ArtifactId = productionSetArtifactId;
-                    productionResultModel.ErrorMessage = string.Empty;
+                    productionResultModel.Success = false;
+                    productionResultModel.ErrorMessage = "There are no documents in the workspace.";
                 }
                 else
                 {
-                    throw new SmokeTestException("An error occured when creating a new production set and running it.");
+                    ProductionModel productionModel = new ProductionModel(
+                        workspaceArtifactId: WorkspaceArtifactId,
+                        productionName: $"Page Level - Simple - {Guid.NewGuid()}",
+                        attachmentRelationalFieldArtifactId: Constants.GroupIdentifierFieldArtifactId,
+                        batesPrefix: "ABC",
+                        batesSuffix: "XYZ",
+                        batesStartNumber: 1,
+                        numberOfDigitsForDocumentNumbering: 7,
+                        brandingFontSize: 10,
+                        scaleBrandingFont: false,
+                        emailRecipients: string.Empty,
+                        markupSetModel: new MarkupSetModel(
+                            name: $"Generic MarkupSet{DateTime.UtcNow}{DateTime.UtcNow.Millisecond}",
+                            markupSetOrder: 10,
+                            redactionText: "who cares"),
+                        productionType: ProductionType.ImagesOnly,
+                        productionDataSourceName: "Test Datasource 123",
+                        savedSearchArtifactId: savedSearchArtifactId,
+                        clientModel: new ClientModel(
+                            rsapiClient: RsapiClient,
+                            productionManager: ProductionManager,
+                            productionDataSourceManager: ProductionDataSourceManager),
+                        stagingAndProductionWaitTimeOutInSeconds: 300);
+                    int productionSetArtifactId = productionHelper.CreateAndRunProductionSet(productionModel);
+                    Production production = ProductionManager.ReadSingleAsync(WorkspaceArtifactId, productionSetArtifactId).Result;
+                    ProductionStatus productionStatus = production.ProductionMetadata.Status;
+                    int productionArtifactId = production.ArtifactID;
+
+                    if (productionArtifactId > 0)
+                    {
+                        productionHelper.DeleteProductionSet(ProductionManager, WorkspaceArtifactId, productionArtifactId);
+                    }
+
+                    if (productionStatus == ProductionStatus.Produced)
+                    {
+                        productionResultModel.Success = true;
+                        productionResultModel.ArtifactId = productionSetArtifactId;
+                        productionResultModel.ErrorMessage = string.Empty;
+                    }
+                    else
+                    {
+                        throw new SmokeTestException("An error occured when creating a new production set and running it.");
+                    }
                 }
             }
             catch (Exception ex)

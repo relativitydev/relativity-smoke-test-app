@@ -34,6 +34,7 @@ namespace SmokeTest.Helpers
         {
             try
             {
+
                 //create production object
                 Console.WriteLine("Creating production object.....");
                 Production production = CreateProductionObject(productionModel: productionModel);

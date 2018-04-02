@@ -90,21 +90,60 @@ namespace SmokeTest.Helpers
                 }
                 catch (Exception ex)
                 {
-                    throw new SmokeTestException($"{errorContext}. Query.", ex);
+                    throw new Exception("Error while querying documents.", ex);
                 }
 
-                if (documentQueryResultSet.Success && documentQueryResultSet.Results.Count > 0)
+                if (documentQueryResultSet.Success)
                 {
                     retVal.AddRange(documentQueryResultSet.Results.Select(result => result.Artifact.ArtifactID));
                 }
                 else
                 {
-                    throw new SmokeTestException(errorContext);
+                    throw new Exception("Unable to query documents");
                 }
             }
             catch (Exception ex)
             {
                 throw new SmokeTestException(errorContext, ex);
+            }
+
+            return retVal;
+        }
+
+        public static bool DocumentsExistInWorkspace(IRSAPIClient rsapiClient, int workspaceArtifactId)
+        {
+            bool retVal = false;
+            rsapiClient.APIOptions.WorkspaceID = workspaceArtifactId;
+
+            try
+            {
+                Query<Document> documentQuery = new Query<Document>
+                {
+                    Fields = FieldValue.NoFields
+                };
+                QueryResultSet<Document> documentQueryResultSet;
+
+                try
+                {
+                    documentQueryResultSet = rsapiClient.Repositories.Document.Query(documentQuery);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error while querying documents.", ex);
+                }
+
+                if (documentQueryResultSet.Success && documentQueryResultSet.TotalCount > 0)
+                {
+                    retVal = true;
+                }
+                else if (documentQueryResultSet.Success == false)
+                {
+                    throw new Exception($@"Error Querying documents: {documentQueryResultSet.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new SmokeTestException("Error while checking if documents exist in workspace", ex);
             }
 
             return retVal;
