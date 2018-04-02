@@ -15,6 +15,7 @@ using SmokeTest.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using IAgentHelper = SmokeTest.Interfaces.IAgentHelper;
 
 namespace SmokeTest
@@ -147,11 +148,29 @@ namespace SmokeTest
         {
             try
             {
+                var maxRetry = 3;
+                var retryCnt = 0;
+                var stackTrace = String.Empty;
+
                 RdoHelper.UpdateTestRdoRecord(RsapiClient, WorkspaceArtifactId, testRdo.ArtifactID, null, Constants.Status.TestRdo.RunningTest, null, null);
                 ResultModel resultModel = smokeTestModel.Method();
+                while (resultModel.Success == false && retryCnt < maxRetry)
+                {
+                    try
+                    {
+                        Thread.Sleep(5000);
+                        resultModel = smokeTestModel.Method();
+                    }
+                    catch (Exception ex)
+                    {
+                        stackTrace += ex.ToString();
+                    }
+
+                    retryCnt++;
+                }
                 if (!resultModel.Success)
                 {
-                    throw new SmokeTestException($"An error occured in {smokeTestModel.Name}. ErrorMessage: {resultModel.ErrorMessage}");
+                    throw new SmokeTestException($"An error occured in {smokeTestModel.Name}. ErrorMessage: {resultModel.ErrorMessage}. Exception: {stackTrace}");
                 }
                 RdoHelper.UpdateTestRdoRecord(RsapiClient, WorkspaceArtifactId, testRdo.ArtifactID, null, Constants.Status.TestRdo.Success, null, null);
             }
