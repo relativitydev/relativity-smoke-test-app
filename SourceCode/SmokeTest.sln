@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmokeTest", "SmokeTest\Smok
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmokeTest.Tests", "SmokeTest.Tests\SmokeTest.Tests.csproj", "{6238321A-5C0A-4E79-B5D1-F6D0FF6D850C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emailer", "Emailer\Emailer.csproj", "{F0F01DE3-13B6-470A-8DCD-A5F4859FBA24}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{6238321A-5C0A-4E79-B5D1-F6D0FF6D850C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6238321A-5C0A-4E79-B5D1-F6D0FF6D850C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6238321A-5C0A-4E79-B5D1-F6D0FF6D850C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F0F01DE3-13B6-470A-8DCD-A5F4859FBA24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F0F01DE3-13B6-470A-8DCD-A5F4859FBA24}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F0F01DE3-13B6-470A-8DCD-A5F4859FBA24}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F0F01DE3-13B6-470A-8DCD-A5F4859FBA24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
