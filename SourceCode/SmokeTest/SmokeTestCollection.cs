@@ -245,7 +245,7 @@ namespace SmokeTest
 		{
 			IWorkspaceHelper workspaceHelper = new WorkspaceHelper();
 			string workspaceName = $"{Constants.Prefix}-{Guid.NewGuid()}";
-			ResultModel workspaceResultModel = workspaceHelper.CreateWorkspace(RsapiClient, workspaceName);
+			ResultModel workspaceResultModel = workspaceHelper.QueryTemplateAndCreateWorkspace(RsapiClient, Constants.WORKSPACE_TEMPLATE_NAME, workspaceName);
 			if (workspaceResultModel.Success)
 			{
 				workspaceHelper.DeleteWorkspace(RsapiClient, workspaceResultModel.ArtifactId);

@@ -4,6 +4,7 @@ namespace SmokeTest
 {
 	public class Constants
 	{
+		public const string WORKSPACE_TEMPLATE_NAME = "Relativity Starter Template";
 		public const string SmokeTestRunnerAgentName = "Smoke Test Runner Agent";
 		public const string SmokeTestAnalysisAgentName = "Smoke Test Analysis Agent";
 		public const string TestAgentToCreateName = "Dummy Agent";

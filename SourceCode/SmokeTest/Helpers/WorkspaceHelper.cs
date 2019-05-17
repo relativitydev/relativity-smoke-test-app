@@ -4,6 +4,7 @@ using SmokeTest.Exceptions;
 using SmokeTest.Interfaces;
 using SmokeTest.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,7 +14,57 @@ namespace SmokeTest.Helpers
 	{
 		private static readonly TaskCompletionSource<ProcessInformation> TaskCompletionSource = new TaskCompletionSource<ProcessInformation>();
 
-		public ResultModel CreateWorkspace(IRSAPIClient rsapiClient, string workspaceName)
+		public ResultModel QueryTemplateAndCreateWorkspace(IRSAPIClient rsapiClient, string templateName, string workspaceName)
+		{
+			// Query for the RelativityOne Quick Start Template
+			List<int> workspaceArtifactIds = WorkspaceQuery(rsapiClient, templateName);
+			if (workspaceArtifactIds.Count > 1)
+			{
+				throw new Exception($"Multiple Template workspaces exist with the same name [Name: {templateName}]");
+			}
+
+			int templateArtifactId = workspaceArtifactIds.First();
+
+			// Create the workspace 
+			ResultModel resultModel = CreateWorkspace(rsapiClient, templateArtifactId, workspaceName);
+			return resultModel;
+		}
+
+		public static List<int> WorkspaceQuery(IRSAPIClient rsapiClient, string workspaceName)
+		{
+			Console.WriteLine($"Querying for Workspaces [Name: {workspaceName}]");
+
+			try
+			{
+				rsapiClient.APIOptions.WorkspaceID = -1;
+
+				TextCondition textCondition = new TextCondition(WorkspaceFieldNames.Name, TextConditionEnum.EqualTo, workspaceName);
+				Query<Workspace> workspaceQuery = new Query<Workspace>
+				{
+					Fields = FieldValue.AllFields,
+					Condition = textCondition
+				};
+
+				QueryResultSet<Workspace> workspaceQueryResultSet = rsapiClient.Repositories.Workspace.Query(workspaceQuery);
+
+				if (!workspaceQueryResultSet.Success || workspaceQueryResultSet.Results == null)
+				{
+					throw new Exception("Failed to query Workspaces");
+				}
+
+				List<int> workspaceArtifactIds = workspaceQueryResultSet.Results.Select(x => x.Artifact.ArtifactID).ToList();
+
+				Console.WriteLine($"Queried for Workspaces! [Count: {workspaceArtifactIds.Count}]");
+
+				return workspaceArtifactIds;
+			}
+			catch (Exception ex)
+			{
+				throw new Exception("An error occured when querying Workspaces", ex);
+			}
+		}
+
+		public ResultModel CreateWorkspace(IRSAPIClient rsapiClient, int templateArtifactId, string workspaceName)
 		{
 			if (rsapiClient == null)
 			{
@@ -36,13 +87,12 @@ namespace SmokeTest.Helpers
 
 				try
 				{
-					int templateId = 1015024;
-					ProcessOperationResult processOperationResult = rsapiClient.Repositories.Workspace.CreateAsync(templateId, workspaceDto);
+					ProcessOperationResult processOperationResult = rsapiClient.Repositories.Workspace.CreateAsync(templateArtifactId, workspaceDto);
 
 					if (processOperationResult.Success)
 					{
 						Task<ProcessInformation> task = MonitorProcessStateAsync(rsapiClient, processOperationResult.ProcessID);
-						ProcessInformation processInfo = (ProcessInformation)task.Result;
+						ProcessInformation processInfo = task.Result;
 						DisconnectMonitorProcessStateAsync(rsapiClient);
 
 						if (processInfo.State == ProcessStateValue.Completed)

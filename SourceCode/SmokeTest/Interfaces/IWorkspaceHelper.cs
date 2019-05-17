@@ -5,7 +5,7 @@ namespace SmokeTest.Interfaces
 {
 	public interface IWorkspaceHelper
 	{
-		ResultModel CreateWorkspace(IRSAPIClient rsapiClient, string workspaceName);
+		ResultModel QueryTemplateAndCreateWorkspace(IRSAPIClient rsapiClient, string templateName, string workspaceName);
 		ResultModel DeleteWorkspace(IRSAPIClient rsapiClient, int workspaceArtifactId);
 	}
 }
