@@ -1,4 +1,5 @@
-﻿using kCura.Data.RowDataGateway;
+﻿using DbContextHelper;
+using kCura.Data.RowDataGateway;
 using kCura.Relativity.Client;
 using NUnit.Framework;
 using Relativity.API;
@@ -49,7 +50,7 @@ namespace SmokeTest.Tests
 			ProcessingDataSourceManager = ServiceFactory.CreateProxy<IProcessingDataSourceManager>();
 			ResourcePoolManager = ServiceFactory.CreateProxy<IResourcePoolManager>();
 			ProcessingJobManager = ServiceFactory.CreateProxy<IProcessingJobManager>();
-			IDBContext workspaceDbContext = new DBContext(new Context("serverName", "databaseName", "sqlServerUsername", "sqlServerPassword"));
+			IDBContext workspaceDbContext = new DbContext("serverName", "databaseName", "sqlServerUsername", "sqlServerPassword");
 
 			int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(Constants.WorkspaceArtifactId);
 			Sut = new SmokeTestCollection(
