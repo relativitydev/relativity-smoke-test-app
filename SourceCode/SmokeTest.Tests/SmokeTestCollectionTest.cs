@@ -1,5 +1,4 @@
 ﻿using DbContextHelper;
-using kCura.Data.RowDataGateway;
 using kCura.Relativity.Client;
 using NUnit.Framework;
 using Relativity.API;
