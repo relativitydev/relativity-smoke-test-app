@@ -143,12 +143,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Emailer\Emailer.csproj">
-      <Project>{f0f01de3-13b6-470a-8dcd-a5f4859fba24}</Project>
-      <Name>Emailer</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="LICENSE.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
