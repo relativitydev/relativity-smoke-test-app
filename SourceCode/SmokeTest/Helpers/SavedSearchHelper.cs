@@ -3,6 +3,7 @@ using kCura.Relativity.Client.DTOs;
 using Relativity.Services.Search;
 using SmokeTest.Exceptions;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -147,6 +148,19 @@ namespace SmokeTest.Helpers
 			}
 
 			return retVal;
+		}
+
+		public static async Task<bool> DeleteKeywordSearch(IKeywordSearchManager keywordSearchManager, int searchId, int workspaceId)
+		{
+			try
+			{
+				await keywordSearchManager.DeleteSingleAsync(workspaceId, searchId);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				throw new SmokeTestException("Error while trying to delete a keyword search", ex);
+			}
 		}
 	}
 }

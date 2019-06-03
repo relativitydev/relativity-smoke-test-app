@@ -39,16 +39,17 @@ namespace SmokeTest.Helpers
 			{
 				rsapiClient.APIOptions.WorkspaceID = workspaceArtifactId;
 				int? imagingSetArtifactId = null;
+				int? imagingProfileArtifactId = null;
 
 				try
 				{
 					// Create Imaging Profile record
 					string imagingProfileName = $"{Constants.Prefix} - Imaging Profile - {DateTime.Now}";
-					int imagingProfileArtifactId = CreateImagingProfileRecord(imagingProfileManager, workspaceArtifactId, imagingProfileName);
+					imagingProfileArtifactId = CreateImagingProfileRecord(imagingProfileManager, workspaceArtifactId, imagingProfileName);
 
 					// Create Imaging Set record
 					string imagingSetName = $"{Constants.Prefix} - Imaging Set - {DateTime.Now}";
-					imagingSetArtifactId = CreateImagingSetRecord(rsapiClient, imagingSetManager, workspaceArtifactId, imagingSetName, Constants.AllDocumentsSavedSearchName, imagingProfileArtifactId);
+					imagingSetArtifactId = CreateImagingSetRecord(rsapiClient, imagingSetManager, workspaceArtifactId, imagingSetName, Constants.AllDocumentsSavedSearchName, imagingProfileArtifactId.Value);
 
 					// Run Imaging Set
 					RunImagingSet(imagingJobManager, workspaceArtifactId, imagingSetArtifactId.Value);

@@ -269,7 +269,20 @@ namespace SmokeTest
 				}
 				else
 				{
+					int savedSearchArtifactId = SavedSearchHelper.CreateSavedSearchWithControlNumbers(
+						keywordSearchManager: KeywordSearchManager,
+						rsapiClient: RsapiClient,
+						workspaceArtifactId: WorkspaceArtifactId,
+						documentIdentifierFieldArtifactId: DocumentIdentifierFieldArtifactId,
+						searchName: Constants.AllDocumentsSavedSearchName,
+						controlNumbers: new List<string>());
+
 					imageResultModel = imageHelper.ImageDocuments(RsapiClient, ImagingProfileManager, ImagingSetManager, ImagingJobManager, WorkspaceArtifactId);
+
+					if (imageResultModel.Success)
+					{
+						bool savedSearchDeleteResult = SavedSearchHelper.DeleteKeywordSearch(KeywordSearchManager, savedSearchArtifactId, WorkspaceArtifactId).Result;
+					}
 				}
 			}
 			catch (Exception ex)

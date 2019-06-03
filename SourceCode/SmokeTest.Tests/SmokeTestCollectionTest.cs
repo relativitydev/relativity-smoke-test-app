@@ -49,6 +49,9 @@ namespace SmokeTest.Tests
 			ProcessingDataSourceManager = ServiceFactory.CreateProxy<IProcessingDataSourceManager>();
 			ResourcePoolManager = ServiceFactory.CreateProxy<IResourcePoolManager>();
 			ProcessingJobManager = ServiceFactory.CreateProxy<IProcessingJobManager>();
+			ImagingProfileManager = ServiceFactory.CreateProxy<IImagingProfileManager>();
+			ImagingSetManager = ServiceFactory.CreateProxy<IImagingSetManager>();
+			ImagingJobManager = ServiceFactory.CreateProxy<IImagingJobManager>();
 			IDBContext workspaceDbContext = new DbContext("serverName", "databaseName", "sqlServerUsername", "sqlServerPassword");
 
 			int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(Constants.WorkspaceArtifactId);
@@ -138,6 +141,13 @@ namespace SmokeTest.Tests
 		{
 			ResultModel dataGridResultModel = Sut.DataGridTest();
 			Assert.That(dataGridResultModel.Success, Is.EqualTo(true));
+		}
+
+		[Test]
+		public void ImagingTest()
+		{
+			ResultModel imagingResultModel = Sut.ImageTest();
+			Assert.That(imagingResultModel.Success, Is.EqualTo(true));
 		}
 	}
 }
