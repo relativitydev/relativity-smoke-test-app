@@ -258,7 +258,7 @@ namespace SmokeTest
 			ResultModel imageResultModel = null;
 			try
 			{
-				IImageHelper imageHelper = new ImageHelper();
+				IImageHelper imageHelper = new ImageHelper(RsapiClient, ImagingProfileManager, ImagingSetManager, ImagingJobManager);
 				if (!SavedSearchHelper.DocumentsExistInWorkspace(RsapiClient, WorkspaceArtifactId))
 				{
 					imageResultModel = new ResultModel("Image")
@@ -277,7 +277,7 @@ namespace SmokeTest
 						searchName: Constants.AllDocumentsSavedSearchName,
 						controlNumbers: new List<string>());
 
-					imageResultModel = imageHelper.ImageDocuments(RsapiClient, ImagingProfileManager, ImagingSetManager, ImagingJobManager, WorkspaceArtifactId);
+					imageResultModel = imageHelper.ImageDocuments(WorkspaceArtifactId);
 
 					if (imageResultModel.Success)
 					{
