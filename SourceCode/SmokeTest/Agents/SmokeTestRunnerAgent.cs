@@ -15,7 +15,7 @@ using System.Data;
 
 namespace SmokeTest.Agents
 {
-	[kCura.Agent.CustomAttributes.Name(Constants.SmokeTestRunnerAgentName)]
+	[kCura.Agent.CustomAttributes.Name(Constants.Agents.SMOKE_TEST_RUNNER_AGENT_NAME)]
 	[System.Runtime.InteropServices.Guid("D41F2DB7-8803-4E4F-B63B-CC7DB3CE99C8")]
 	public class SmokeTestRunnerAgent : kCura.Agent.AgentBase
 	{
@@ -131,6 +131,6 @@ namespace SmokeTest.Agents
 			return workspaceArtifactIds;
 		}
 
-		public override string Name => Constants.SmokeTestRunnerAgentName;
+		public override string Name => Constants.Agents.SMOKE_TEST_RUNNER_AGENT_NAME;
 	}
 }

@@ -148,15 +148,15 @@ namespace SmokeTest
 
 		private void RunTest(SmokeTestModel smokeTestModel, RDO testRdo)
 		{
+			const int maxRetry = 3;
 			try
 			{
-				var maxRetry = 3;
-				var retryCnt = 0;
-				var stackTrace = String.Empty;
+				int retryCount = 0;
+				string stackTrace = string.Empty;
 
 				RdoHelper.UpdateTestRdoRecord(RsapiClient, WorkspaceArtifactId, testRdo.ArtifactID, null, Constants.Status.TestRdo.RunningTest, null, null);
 				ResultModel resultModel = smokeTestModel.Method();
-				while (resultModel.Success == false && retryCnt < maxRetry)
+				while (resultModel.Success == false && retryCount < maxRetry)
 				{
 					try
 					{
@@ -168,7 +168,7 @@ namespace SmokeTest
 						stackTrace += ex.ToString();
 					}
 
-					retryCnt++;
+					retryCount++;
 				}
 				if (!resultModel.Success)
 				{
@@ -229,8 +229,8 @@ namespace SmokeTest
 			ResultModel agentResultModel = agentHelper.CreateAgent(
 					agentManager: AgentManager,
 					objectManager: ObjectManager,
-					applicationName: Constants.SmokeTestApplicationName,
-					agentName: Constants.TestAgentToCreateName);
+					applicationName: Constants.Agents.SMOKE_TEST_APPLICATION_NAME,
+					agentName: Constants.Agents.TEST_AGENT_TO_CREATE_NAME);
 			if (agentResultModel.Success)
 			{
 				agentHelper.DeleteAgent(AgentManager, agentResultModel.ArtifactId);
@@ -252,7 +252,7 @@ namespace SmokeTest
 
 		public ResultModel ImageTest()
 		{
-			ResultModel imageResultModel = null;
+			ResultModel imageResultModel;
 			try
 			{
 				IImageHelper imageHelper = new ImageHelper();
@@ -283,7 +283,7 @@ namespace SmokeTest
 
 		public ResultModel ConversionTest()
 		{
-			ResultModel imageResultModel = null;
+			ResultModel imageResultModel;
 			try
 			{
 				IViewerHelper viewerHelper = new ViewerHelper();
@@ -388,13 +388,13 @@ namespace SmokeTest
 
 		public ResultModel ProcessingTest()
 		{
-			var processingHelper = new ProcessingHelper(RsapiClient, ProcessingCustodianManager, ProcessingSetManager, ProcessingDataSourceManager, ResourcePoolManager, ProcessingJobManager);
+			ProcessingHelper processingHelper = new ProcessingHelper(RsapiClient, ProcessingCustodianManager, ProcessingSetManager, ProcessingDataSourceManager, ResourcePoolManager, ProcessingJobManager);
 			return processingHelper.CreateAndRunProcessingSet(WorkspaceArtifactId);
 		}
 
 		public ResultModel DataGridTest()
 		{
-			var dataGridHelper = new DataGridHelper(RsapiClient);
+			DataGridHelper dataGridHelper = new DataGridHelper(RsapiClient);
 			return dataGridHelper.VerifyDataGridFunctionality(WorkspaceArtifactId);
 		}
 	}
