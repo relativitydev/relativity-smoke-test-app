@@ -1,19 +1,33 @@
-﻿using System;
+﻿using Relativity.Services.Agent;
+using System;
 
 namespace SmokeTest
 {
 	public class Constants
 	{
 		public const string WORKSPACE_TEMPLATE_NAME = "Relativity Starter Template";
-		public const string SmokeTestRunnerAgentName = "Smoke Test Runner Agent";
-		public const string SmokeTestAnalysisAgentName = "Smoke Test Analysis Agent";
-		public const string TestAgentToCreateName = "Dummy Agent";
 		public static readonly string Prefix = "ST";
 		public static readonly int GroupIdentifierFieldArtifactId = 1003671;
 		public const string AllDocumentsSavedSearchName = "All Documents";
 
 		public const int NumberOfTextFilesToCreate = 10;
 		public const String ProcessingLoadFilePath = "C:\\Program Files\\kCura Corporation\\Relativity\\Licenses\\jQuery";
+
+		public class Agents
+		{
+			public const string SMOKE_TEST_APPLICATION_NAME = "Smoke Test";
+			public const string SMOKE_TEST_RUNNER_AGENT_NAME = "Smoke Test Runner Agent";
+			public const string SMOKE_TEST_ANALYSIS_AGENT_NAME = "Smoke Test Analysis Agent";
+			public const string TEST_AGENT_TO_CREATE_NAME = "Dummy Agent";
+			public const string AGENT_OBJECT_TYPE = "Agent";
+			public const string AGENT_FIELD_NAME = "Name";
+			public const string KEYWORDS = SMOKE_TEST_APPLICATION_NAME;
+			public const string NOTES = SMOKE_TEST_APPLICATION_NAME;
+			public const int EDDS_WORKSPACE_ARTIFACT_ID = -1;
+			public const bool ENABLE_AGENT = true;
+			public const int AGENT_INTERVAL = 20;
+			public const Agent.LoggingLevelEnum AGENT_LOGGING_LEVEL = Agent.LoggingLevelEnum.All;
+		}
 
 		public class Status
 		{
@@ -70,8 +84,6 @@ namespace SmokeTest
 
 			public class Choices
 			{
-
-
 				public class Processing
 				{
 					public class DiscoverStatus

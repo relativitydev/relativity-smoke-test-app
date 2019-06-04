@@ -6,7 +6,7 @@ using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
 using Relativity.Productions.Services.Interfaces.DTOs;
-using Relativity.Services.Agent;
+using Relativity.Services.Objects;
 using Relativity.Services.ResourcePool;
 using Relativity.Services.Search;
 using SmokeTest.Exceptions;
@@ -25,7 +25,8 @@ namespace SmokeTest
 	{
 		public List<SmokeTestModel> SmokeTests = new List<SmokeTestModel>();
 		public IRSAPIClient RsapiClient { get; set; }
-		public IAgentManager AgentManager { get; set; }
+		public Relativity.Services.Interfaces.Agent.IAgentManager AgentManager { get; set; }
+		public IObjectManager ObjectManager { get; set; }
 		public IProductionManager ProductionManager { get; set; }
 		public IProductionDataSourceManager ProductionDataSourceManager { get; set; }
 		public IKeywordSearchManager KeywordSearchManager { get; set; }
@@ -44,12 +45,13 @@ namespace SmokeTest
 		public IRdoHelper RdoHelper { get; set; }
 
 
-		public SmokeTestCollection(IRSAPIClient rsapiClient, IAgentManager agentManager, IProductionManager productionManager,
+		public SmokeTestCollection(IRSAPIClient rsapiClient, Relativity.Services.Interfaces.Agent.IAgentManager agentManager, IObjectManager objectManager, IProductionManager productionManager,
 				IProductionDataSourceManager productionDataSourceManager, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolManager, IProcessingJobManager processingJobManager,
 				IKeywordSearchManager keywordSearchManager, IDocumentViewerServiceManager documentViewerServiceManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, IDBContext workspaceDbContext, int workspaceArtifactId, int documentIdentifierFieldArtifactId)
 		{
 			RsapiClient = rsapiClient;
 			AgentManager = agentManager;
+			ObjectManager = objectManager;
 			ProductionManager = productionManager;
 			ProductionDataSourceManager = productionDataSourceManager;
 			KeywordSearchManager = keywordSearchManager;
@@ -147,15 +149,15 @@ namespace SmokeTest
 
 		private void RunTest(SmokeTestModel smokeTestModel, RDO testRdo)
 		{
+			const int maxRetry = 3;
 			try
 			{
-				var maxRetry = 3;
-				var retryCnt = 0;
-				var stackTrace = String.Empty;
+				int retryCount = 0;
+				string stackTrace = string.Empty;
 
 				RdoHelper.UpdateTestRdoRecord(RsapiClient, WorkspaceArtifactId, testRdo.ArtifactID, null, Constants.Status.TestRdo.RunningTest, null, null);
 				ResultModel resultModel = smokeTestModel.Method();
-				while (resultModel.Success == false && retryCnt < maxRetry)
+				while (resultModel.Success == false && retryCount < maxRetry)
 				{
 					try
 					{
@@ -167,7 +169,7 @@ namespace SmokeTest
 						stackTrace += ex.ToString();
 					}
 
-					retryCnt++;
+					retryCount++;
 				}
 				if (!resultModel.Success)
 				{
@@ -224,17 +226,12 @@ namespace SmokeTest
 		public ResultModel AgentTest()
 		{
 			IAgentHelper agentHelper = new AgentHelper();
-			string agentName = $"{Constants.Prefix}-{Guid.NewGuid()}";
-			int agentTypeId = agentHelper.GetAgentTypeArtifactId(AgentManager, Constants.TestAgentToCreateName);
-			int agentServer = agentHelper.GetFirstAgentServerArtifactId(AgentManager);
+
 			ResultModel agentResultModel = agentHelper.CreateAgent(
 					agentManager: AgentManager,
-					agentName: agentName,
-					agentTypeId: agentTypeId,
-					agentServer: agentServer,
-					enableAgent: true,
-					agentInterval: 5,
-					agentLoggingLevel: Agent.LoggingLevelEnum.All);
+					objectManager: ObjectManager,
+					applicationName: Constants.Agents.SMOKE_TEST_APPLICATION_NAME,
+					agentName: Constants.Agents.TEST_AGENT_TO_CREATE_NAME);
 			if (agentResultModel.Success)
 			{
 				agentHelper.DeleteAgent(AgentManager, agentResultModel.ArtifactId);
@@ -256,7 +253,7 @@ namespace SmokeTest
 
 		public ResultModel ImageTest()
 		{
-			ResultModel imageResultModel = null;
+			ResultModel imageResultModel;
 			try
 			{
 				IImageHelper imageHelper = new ImageHelper(RsapiClient, ImagingProfileManager, ImagingSetManager, ImagingJobManager);
@@ -300,7 +297,7 @@ namespace SmokeTest
 
 		public ResultModel ConversionTest()
 		{
-			ResultModel imageResultModel = null;
+			ResultModel imageResultModel;
 			try
 			{
 				IViewerHelper viewerHelper = new ViewerHelper();
@@ -414,13 +411,13 @@ namespace SmokeTest
 
 		public ResultModel ProcessingTest()
 		{
-			var processingHelper = new ProcessingHelper(RsapiClient, ProcessingCustodianManager, ProcessingSetManager, ProcessingDataSourceManager, ResourcePoolManager, ProcessingJobManager);
+			ProcessingHelper processingHelper = new ProcessingHelper(RsapiClient, ProcessingCustodianManager, ProcessingSetManager, ProcessingDataSourceManager, ResourcePoolManager, ProcessingJobManager);
 			return processingHelper.CreateAndRunProcessingSet(WorkspaceArtifactId);
 		}
 
 		public ResultModel DataGridTest()
 		{
-			var dataGridHelper = new DataGridHelper(RsapiClient);
+			DataGridHelper dataGridHelper = new DataGridHelper(RsapiClient);
 			return dataGridHelper.VerifyDataGridFunctionality(WorkspaceArtifactId);
 		}
 	}
