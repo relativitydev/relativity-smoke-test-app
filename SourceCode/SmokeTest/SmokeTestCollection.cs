@@ -304,6 +304,7 @@ namespace SmokeTest
 			try
 			{
 				IViewerHelper viewerHelper = new ViewerHelper();
+				RsapiClient.APIOptions.WorkspaceID = WorkspaceArtifactId;
 				if (!SavedSearchHelper.DocumentsExistInWorkspace(RsapiClient, WorkspaceArtifactId))
 				{
 					imageResultModel = new ResultModel("Viewer")
@@ -314,6 +315,14 @@ namespace SmokeTest
 				}
 				else
 				{
+					int savedSearchArtifactId = SavedSearchHelper.CreateSavedSearchWithControlNumbers(
+						keywordSearchManager: KeywordSearchManager,
+						rsapiClient: RsapiClient,
+						workspaceArtifactId: WorkspaceArtifactId,
+						documentIdentifierFieldArtifactId: DocumentIdentifierFieldArtifactId,
+						searchName: Constants.AllDocumentsSavedSearchName,
+						controlNumbers: new List<string>());
+
 					imageResultModel = viewerHelper.ConvertDocumentsForViewer(RsapiClient, DocumentViewerServiceManager, WorkspaceDbContext, WorkspaceArtifactId);
 				}
 			}

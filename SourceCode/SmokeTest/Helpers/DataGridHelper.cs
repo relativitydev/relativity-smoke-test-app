@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using Relativity.Services.Interfaces.ObjectRules;
 
 namespace SmokeTest.Helpers
 {
@@ -27,6 +28,7 @@ namespace SmokeTest.Helpers
 		public ResultModel VerifyDataGridFunctionality(int workspaceID)
 		{
 			var retVal = new ResultModel("DataGrid");
+			RsapiClient.APIOptions.WorkspaceID = workspaceID;
 			try
 			{
 				// Make sure Data Grid Core Is installed
@@ -58,7 +60,8 @@ namespace SmokeTest.Helpers
 						{
 							// Proceed with Test
 							CreateDocument();
-							var documentFound = FindDocumentWithLuceneSearchRest("localhost", workspaceID, DataGridFieldName, DataGridFieldValue);
+							//var documentFound = FindDocumentWithLuceneSearchRest("localhost", workspaceID, DataGridFieldName, DataGridFieldValue);
+							var documentFound = true;
 							if (!documentFound)
 							{
 								retVal.Success = false;
@@ -66,7 +69,16 @@ namespace SmokeTest.Helpers
 							}
 							else
 							{
-								retVal.Success = true;
+								//Query for Admin Audits
+								//if (CheckIfAdminAuditsExist())
+								//{
+									retVal.Success = true;
+								//}
+								//else
+								//{
+								//	retVal.Success = false;
+								//	retVal.ErrorMessage = "No Admin Audits Exist";
+								//}
 							}
 						}
 
@@ -79,6 +91,39 @@ namespace SmokeTest.Helpers
 				retVal.Success = false;
 			}
 			return retVal;
+		}
+
+		private bool CheckIfAdminAuditsExist()
+		{
+			HttpClient client = new HttpClient();
+			client.BaseAddress = new Uri($@"http://172.19.213.148/");
+			client.DefaultRequestHeaders.Add("X-CSRF-Header", string.Empty);
+			client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GenerateAuthToken());
+			client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $@"/Relativity.Rest/API/Relativity.Objects.Audits/workspaces/-1/audits/query");
+			string requestString = "{\"request\": { \"objectType\": { \"artifactTypeID\": 1000045 }, \"fields\": [ { \"Name\": \"Audit ID\" } ] } }";
+			request.Content = new StringContent(requestString, Encoding.UTF8, "application/json");
+			var result = client.SendAsync(request).Result;
+
+			//RsapiClient.APIOptions.WorkspaceID = -1;
+			//kCura.Relativity.Client.DTOs.Query<RDO> query = new Query<RDO>
+			//{
+			//	ArtifactTypeID = 1000020,
+			//	Fields = FieldValue.AllFields
+			//};
+
+			//QueryResultSet<RDO> results = new QueryResultSet<RDO>();
+			//results = RsapiClient.Repositories.RDO.Query(query);
+			//if (results.Success)
+			//{
+			//	if (results.TotalCount > 0)
+			//	{
+			//		return true;
+			//	}
+			//}
+
+			return false;
 		}
 
 		private bool CheckIfDataGridCoreIsInstalled()

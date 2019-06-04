@@ -123,6 +123,20 @@ namespace SmokeTest.Tests
 		}
 
 		[Test]
+		public void ImagingTest()
+		{
+			ResultModel imagingResultModel = Sut.ImageTest();
+			Assert.That(imagingResultModel.Success, Is.EqualTo(true));
+		}
+
+		[Test]
+		public void ConversionTest()
+		{
+			ResultModel conversionResultModel = Sut.ConversionTest();
+			Assert.That(conversionResultModel.Success, Is.EqualTo(true));
+		}
+
+		[Test]
 		public void ProductionCreationAndDeletionTest()
 		{
 			ResultModel productionResultModel = Sut.ProductionTest();
@@ -141,13 +155,6 @@ namespace SmokeTest.Tests
 		{
 			ResultModel dataGridResultModel = Sut.DataGridTest();
 			Assert.That(dataGridResultModel.Success, Is.EqualTo(true));
-		}
-
-		[Test]
-		public void ImagingTest()
-		{
-			ResultModel imagingResultModel = Sut.ImageTest();
-			Assert.That(imagingResultModel.Success, Is.EqualTo(true));
 		}
 	}
 }

@@ -10,11 +10,21 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SmokeTest.Helpers
 {
 	public class ViewerHelper : IViewerHelper
 	{
+		//public IRSAPIClient RsapiClient;
+		//public IDocumentViewerServiceManager DocumentViewerServiceManager;
+
+		//public ViewerHelper(IRSAPIClient rsapiClient, IDocumentViewerServiceManager documentViewerServiceManager)
+		//{
+		//	RsapiClient = rsapiClient;
+		//	DocumentViewerServiceManager = documentViewerServiceManager;
+		//}
+
 		public ResultModel ConvertDocumentsForViewer(IRSAPIClient rsapiClient, IDocumentViewerServiceManager documentViewerServiceManager, IDBContext workspaceDbContext, int workspaceArtifactId)
 		{
 			if (rsapiClient == null)
@@ -45,7 +55,7 @@ namespace SmokeTest.Helpers
 				{
 					// Convert Document
 					int singleDocumentArtifactId = GetSingleDocumentForConversion(rsapiClient, workspaceArtifactId);
-					ViewerContentKey viewerContentKey = GetViewerContentKeyAsync(documentViewerServiceManager, workspaceArtifactId, singleDocumentArtifactId);
+					ViewerContentKey viewerContentKey = GetViewerContentKeyAsync(documentViewerServiceManager, workspaceArtifactId, singleDocumentArtifactId).Result;
 
 					// Verify if the document has been converted without any errors
 					long? cacheEntryId = viewerContentKey.CacheEntryId;
@@ -100,7 +110,7 @@ namespace SmokeTest.Helpers
 			}
 		}
 
-		private ViewerContentKey GetViewerContentKeyAsync(IDocumentViewerServiceManager documentViewerServiceManager, int workspaceArtifactId, int documentArtifactId)
+		private async Task<ViewerContentKey> GetViewerContentKeyAsync(IDocumentViewerServiceManager documentViewerServiceManager, int workspaceArtifactId, int documentArtifactId)
 		{
 			string errorContext = $"An error occured during document conversion. [{nameof(documentArtifactId)}: {documentArtifactId}]";
 
@@ -109,32 +119,34 @@ namespace SmokeTest.Helpers
 				ViewerContentKey viewerContentKey = null;
 				GetViewerContentKeyOptions options = new GetViewerContentKeyOptions
 				{
-					ForceConversion = false
+					ForceConversion = true,
+					ClientId = "DocumentViewer.Conversion.PreConvert",
 				};
 				GetViewerContentKeyRequest request = new GetViewerContentKeyRequest
 				{
 					WorkspaceId = workspaceArtifactId,
 					DocumentIds = new[] { documentArtifactId },
 					ConversionType = ConversionType.Image,
-					Priority = PriorityLevel.OnTheFly,
-					Options = options
+					Priority = PriorityLevel.ConvertAhead,
+					Options = options,
 				};
 
 				try
 				{
-					// Keep checking the value for 5 mins.
-					const int count = 10;
-					const int waitingSeconds = 1;
+					viewerContentKey = await documentViewerServiceManager.GetViewerContentKeyAsync(request);
+					//// Keep checking the value for 5 mins.
+					//const int count = 10;
+					//const int waitingSeconds = 1;
 
-					for (int i = 1; i <= count; i++)
-					{
-						viewerContentKey = (documentViewerServiceManager.GetViewerContentKeyAsync(request)).Result;
-						if (viewerContentKey.CacheEntryId != null)
-						{
-							return viewerContentKey;
-						}
-						Thread.Sleep(waitingSeconds * 30 * 1000);
-					}
+					//for (int i = 1; i <= count; i++)
+					//{
+					//	viewerContentKey = documentViewerServiceManager.GetViewerContentKeyAsync(request).Result;
+					//	if (viewerContentKey.CacheEntryId != null)
+					//	{
+					//		return viewerContentKey;
+					//	}
+					//	Thread.Sleep(waitingSeconds * 30 * 1000);
+					//}
 				}
 				catch (Exception ex)
 				{
