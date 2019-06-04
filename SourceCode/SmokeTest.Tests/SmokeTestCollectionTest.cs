@@ -6,7 +6,7 @@ using Relativity.DocumentViewer.Services;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
-using Relativity.Services.Agent;
+using Relativity.Services.Objects;
 using Relativity.Services.ResourcePool;
 using Relativity.Services.Search;
 using Relativity.Services.ServiceProxy;
@@ -20,7 +20,8 @@ namespace SmokeTest.Tests
 		public SmokeTestCollection Sut { get; set; }
 		public ServiceFactory ServiceFactory { get; set; }
 		public IRSAPIClient RsapiClient { get; set; }
-		public IAgentManager AgentManager { get; set; }
+		public Relativity.Services.Interfaces.Agent.IAgentManager AgentManager { get; set; }
+		public IObjectManager ObjectManager { get; set; }
 		public IProductionManager ProductionManager { get; set; }
 		public IProductionDataSourceManager ProductionDataSourceManager { get; set; }
 		public IKeywordSearchManager KeywordSearchManager { get; set; }
@@ -39,7 +40,8 @@ namespace SmokeTest.Tests
 		{
 			ServiceFactory = new ServiceFactory(Constants.ServiceFactorySettings);
 			RsapiClient = ServiceFactory.CreateProxy<IRSAPIClient>();
-			AgentManager = ServiceFactory.CreateProxy<IAgentManager>();
+			AgentManager = ServiceFactory.CreateProxy<Relativity.Services.Interfaces.Agent.IAgentManager>();
+			ObjectManager = ServiceFactory.CreateProxy<IObjectManager>();
 			ProductionManager = ServiceFactory.CreateProxy<IProductionManager>();
 			ProductionDataSourceManager = ServiceFactory.CreateProxy<IProductionDataSourceManager>();
 			KeywordSearchManager = ServiceFactory.CreateProxy<IKeywordSearchManager>();
@@ -55,6 +57,7 @@ namespace SmokeTest.Tests
 			Sut = new SmokeTestCollection(
 					rsapiClient: RsapiClient,
 					agentManager: AgentManager,
+					objectManager: ObjectManager,
 					productionManager: ProductionManager,
 					productionDataSourceManager: ProductionDataSourceManager,
 					keywordSearchManager: KeywordSearchManager,
