@@ -74,8 +74,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Assemblies\Relativity.Processing.Services.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="Relativity.Productions.Services.Interfaces">
-      <HintPath>..\Assemblies\Relativity.Productions.Services.Interfaces.dll</HintPath>
+    <Reference Include="Relativity.Productions.Services.Interfaces, Version=10.1.29.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Relativity.Productions.Client.10.1.29\lib\net462\Relativity.Productions.Services.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="Relativity.Services.DataContracts, Version=10.1.199.4, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.ObjectManager.10.1.199.4\lib\net462\Relativity.Services.DataContracts.dll</HintPath>

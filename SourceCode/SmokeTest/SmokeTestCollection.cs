@@ -5,6 +5,7 @@ using Relativity.DocumentViewer.Services;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
+using Relativity.Productions.Services.Interfaces.DTOs;
 using Relativity.Services.Agent;
 using Relativity.Services.ResourcePool;
 using Relativity.Services.Search;
@@ -334,6 +335,7 @@ namespace SmokeTest
 			try
 			{
 				IProductionHelper productionHelper = new ProductionHelper();
+				RsapiClient.APIOptions.WorkspaceID = WorkspaceArtifactId;
 				int savedSearchArtifactId = SavedSearchHelper.CreateSavedSearchWithControlNumbers(
 						keywordSearchManager: KeywordSearchManager,
 						rsapiClient: RsapiClient,
@@ -373,16 +375,15 @@ namespace SmokeTest
 									productionDataSourceManager: ProductionDataSourceManager),
 							stagingAndProductionWaitTimeOutInSeconds: 300);
 					int productionSetArtifactId = productionHelper.CreateAndRunProductionSet(productionModel);
-					Production production = ProductionManager.ReadSingleAsync(WorkspaceArtifactId, productionSetArtifactId).Result;
-					ProductionStatus productionStatus = production.ProductionMetadata.Status;
-					int productionArtifactId = production.ArtifactID;
+					ProductionStatusDetailsResult productionStatusDetailsResult = ProductionManager.GetProductionStatusDetails(WorkspaceArtifactId, productionSetArtifactId).Result;
+					string productionStatus = (string) productionStatusDetailsResult.StatusDetails.FirstOrDefault().Value;
 
-					if (productionArtifactId > 0)
+					if (productionSetArtifactId > 0)
 					{
-						productionHelper.DeleteProductionSet(ProductionManager, WorkspaceArtifactId, productionArtifactId);
+						productionHelper.DeleteProductionSet(ProductionManager, WorkspaceArtifactId, productionSetArtifactId);
 					}
 
-					if (productionStatus == ProductionStatus.Produced)
+					if (productionStatus == "Produced")
 					{
 						productionResultModel.Success = true;
 						productionResultModel.ArtifactId = productionSetArtifactId;

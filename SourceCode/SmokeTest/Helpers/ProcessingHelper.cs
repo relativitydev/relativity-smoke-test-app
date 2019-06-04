@@ -36,6 +36,7 @@ namespace SmokeTest.Helpers
 		public ResultModel CreateAndRunProcessingSet(int workspaceID)
 		{
 			var retVal = new ResultModel("ProcessingSet");
+			RsapiClient.APIOptions.WorkspaceID = workspaceID;
 
 			try
 			{
