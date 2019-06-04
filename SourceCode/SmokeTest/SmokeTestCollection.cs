@@ -5,7 +5,7 @@ using Relativity.DocumentViewer.Services;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
-using Relativity.Services.Agent;
+using Relativity.Services.Objects;
 using Relativity.Services.ResourcePool;
 using Relativity.Services.Search;
 using SmokeTest.Exceptions;
@@ -24,7 +24,8 @@ namespace SmokeTest
 	{
 		public List<SmokeTestModel> SmokeTests = new List<SmokeTestModel>();
 		public IRSAPIClient RsapiClient { get; set; }
-		public IAgentManager AgentManager { get; set; }
+		public Relativity.Services.Interfaces.Agent.IAgentManager AgentManager { get; set; }
+		public IObjectManager ObjectManager { get; set; }
 		public IProductionManager ProductionManager { get; set; }
 		public IProductionDataSourceManager ProductionDataSourceManager { get; set; }
 		public IKeywordSearchManager KeywordSearchManager { get; set; }
@@ -43,12 +44,13 @@ namespace SmokeTest
 		public IRdoHelper RdoHelper { get; set; }
 
 
-		public SmokeTestCollection(IRSAPIClient rsapiClient, IAgentManager agentManager, IProductionManager productionManager,
+		public SmokeTestCollection(IRSAPIClient rsapiClient, Relativity.Services.Interfaces.Agent.IAgentManager agentManager, IObjectManager objectManager, IProductionManager productionManager,
 				IProductionDataSourceManager productionDataSourceManager, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolManager, IProcessingJobManager processingJobManager,
 				IKeywordSearchManager keywordSearchManager, IDocumentViewerServiceManager documentViewerServiceManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, IDBContext workspaceDbContext, int workspaceArtifactId, int documentIdentifierFieldArtifactId)
 		{
 			RsapiClient = rsapiClient;
 			AgentManager = agentManager;
+			ObjectManager = objectManager;
 			ProductionManager = productionManager;
 			ProductionDataSourceManager = productionDataSourceManager;
 			KeywordSearchManager = keywordSearchManager;
@@ -223,17 +225,12 @@ namespace SmokeTest
 		public ResultModel AgentTest()
 		{
 			IAgentHelper agentHelper = new AgentHelper();
-			string agentName = $"{Constants.Prefix}-{Guid.NewGuid()}";
-			int agentTypeId = agentHelper.GetAgentTypeArtifactId(AgentManager, Constants.TestAgentToCreateName);
-			int agentServer = agentHelper.GetFirstAgentServerArtifactId(AgentManager);
+
 			ResultModel agentResultModel = agentHelper.CreateAgent(
 					agentManager: AgentManager,
-					agentName: agentName,
-					agentTypeId: agentTypeId,
-					agentServer: agentServer,
-					enableAgent: true,
-					agentInterval: 5,
-					agentLoggingLevel: Agent.LoggingLevelEnum.All);
+					objectManager: ObjectManager,
+					applicationName: Constants.SmokeTestApplicationName,
+					agentName: Constants.TestAgentToCreateName);
 			if (agentResultModel.Success)
 			{
 				agentHelper.DeleteAgent(AgentManager, agentResultModel.ArtifactId);

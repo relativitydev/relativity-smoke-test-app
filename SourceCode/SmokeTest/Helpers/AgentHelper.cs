@@ -1,45 +1,37 @@
-﻿using Relativity.Services.Agent;
-using Relativity.Services.ResourceServer;
+﻿using Relativity.Services.Interfaces.Agent.Models;
+using Relativity.Services.Interfaces.Shared;
+using Relativity.Services.Interfaces.Shared.Models;
+using Relativity.Services.Objects;
+using Relativity.Services.Objects.DataContracts;
 using SmokeTest.Exceptions;
 using SmokeTest.Interfaces;
 using SmokeTest.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SmokeTest.Helpers
 {
 	public class AgentHelper : IAgentHelper
 	{
-		public ResultModel CreateAgent(IAgentManager agentManager, string agentName, int agentTypeId, int agentServer, bool enableAgent, int agentInterval, Agent.LoggingLevelEnum agentLoggingLevel)
+		public ResultModel CreateAgent(Relativity.Services.Interfaces.Agent.IAgentManager agentManager, IObjectManager objectManager, string applicationName, string agentName)
 		{
 			if (agentManager == null)
 			{
 				throw new ArgumentNullException(nameof(agentManager));
 			}
-			if (agentName == null)
+			if (objectManager == null)
 			{
-				throw new ArgumentNullException(nameof(agentName));
+				throw new ArgumentNullException(nameof(objectManager));
 			}
-
+			if (string.IsNullOrWhiteSpace(applicationName))
+			{
+				throw new ArgumentException($"{nameof(applicationName)} is not valid", nameof(applicationName));
+			}
 			if (string.IsNullOrWhiteSpace(agentName))
 			{
-				throw new ArgumentException($"{nameof(agentName)} cannot be an empty string.");
-			}
-
-			if (agentTypeId <= 0)
-			{
-				throw new ArgumentException($"{nameof(agentTypeId)} should be a positive number.");
-			}
-
-			if (agentServer <= 0)
-			{
-				throw new ArgumentException($"{nameof(agentServer)} should be a positive number.");
-			}
-
-			if (agentInterval <= 0)
-			{
-				throw new ArgumentException($"{nameof(agentInterval)} should be a positive number.");
+				throw new ArgumentException($"{nameof(agentName)} is not valid", nameof(agentName));
 			}
 
 			ResultModel resultModel = new ResultModel("Agent");
@@ -47,22 +39,38 @@ namespace SmokeTest.Helpers
 			{
 				try
 				{
-					Agent newAgent = new Agent
-					{
-						AgentType = new AgentTypeRef(agentTypeId),
-						Enabled = enableAgent,
-						Interval = agentInterval,
-						Name = agentName,
-						LoggingLevel = agentLoggingLevel,
-						Server = new ResourceServerRef
-						{
-							ArtifactID = agentServer
-						}
-					};
+					//Query all Agent Types in the Instance
+					List<AgentTypeResponse> agentTypesInInstance = GetAgentTypesInInstanceAsync(agentManager).Result;
 
-					int newAgentArtifactId = agentManager.CreateSingleAsync(newAgent).Result;
-					resultModel.Success = true;
-					resultModel.ArtifactId = newAgentArtifactId;
+					//Filter Agent Types from Relativity application
+					List<AgentTypeResponse> agentTypesInApplication = agentTypesInInstance.Where(x => x.ApplicationName.Equals(applicationName)).ToList();
+
+					//Agent to create
+					AgentTypeResponse agentTypeResponse = agentTypesInApplication.First(x => x.Name.Equals(agentName));
+					int agentTypeArtifactId = agentTypeResponse.ArtifactID;
+					decimal defaultInterval = agentTypeResponse.DefaultInterval ?? Constants.Agents.AGENT_INTERVAL;
+					int defaultLoggingLevel = agentTypeResponse.DefaultLoggingLevel ?? (int)Constants.Agents.AGENT_LOGGING_LEVEL;
+
+					//Check if Agent already exists
+					bool doesAgentExists = CheckIfAtLeastSingleInstanceOfAgentExistsAsync(objectManager, agentName).Result;
+
+					if (doesAgentExists)
+					{
+						Console.WriteLine($"Agent already exists. Skipped creation. [{nameof(agentName)}:{agentName}]");
+					}
+					else
+					{
+						//Query Agent Server for Agent Type
+						List<AgentServerResponse> agentServersForAgentType = GetAgentServersForAgentTypeAsync(agentManager, agentTypeArtifactId).Result;
+						int firstAgentServerArtifactId = agentServersForAgentType.First().ArtifactID;
+
+						//Create Single Agent
+						int newAgentArtifactId = CreateAgentAsync(agentManager, agentTypeArtifactId, firstAgentServerArtifactId, defaultInterval, defaultLoggingLevel).Result;
+						Console.WriteLine($"Agent Created. [{nameof(agentName)}: {agentName}]");
+
+						resultModel.Success = true;
+						resultModel.ArtifactId = newAgentArtifactId;
+					}
 				}
 				catch (Exception ex)
 				{
@@ -78,7 +86,7 @@ namespace SmokeTest.Helpers
 			return resultModel;
 		}
 
-		public ResultModel DeleteAgent(IAgentManager agentManager, int agentArtifactId)
+		public ResultModel DeleteAgent(Relativity.Services.Interfaces.Agent.IAgentManager agentManager, int agentArtifactId)
 		{
 			if (agentManager == null)
 			{
@@ -95,13 +103,8 @@ namespace SmokeTest.Helpers
 			{
 				try
 				{
-					//Verify Agent still exists
-					bool doesAgentExists = GetAgentByArtifactId(agentManager, agentArtifactId) != null;
-					if (doesAgentExists)
-					{
-						agentManager.DeleteSingleAsync(agentArtifactId).Wait();
-						resultModel.Success = true;
-					}
+					agentManager.DeleteAsync(Constants.Agents.EDDS_WORKSPACE_ARTIFACT_ID, agentArtifactId).Wait();
+					resultModel.Success = true;
 				}
 				catch (Exception ex)
 				{
@@ -117,108 +120,86 @@ namespace SmokeTest.Helpers
 			return resultModel;
 		}
 
-		private Agent GetAgentByArtifactId(IAgentManager agentManager, int agentArtifactId)
+		private async Task<List<AgentTypeResponse>> GetAgentTypesInInstanceAsync(Relativity.Services.Interfaces.Agent.IAgentManager agentManager)
 		{
-			if (agentManager == null)
-			{
-				throw new ArgumentNullException(nameof(agentManager));
-			}
-			if (agentArtifactId <= 0)
-			{
-				throw new ArgumentException($"{nameof(agentArtifactId)} should be a positive number.");
-			}
-
-			try
-			{
-				Agent agent = agentManager.ReadSingleAsync(agentArtifactId).Result;
-				return agent;
-			}
-			catch (Exception ex)
-			{
-				throw new SmokeTestException($"An error occured when querying for agent. [{nameof(agentArtifactId)} = {agentArtifactId}].", ex);
-			}
+			List<AgentTypeResponse> agentTypeResponseList = await agentManager.GetAgentTypesAsync(Constants.Agents.EDDS_WORKSPACE_ARTIFACT_ID);
+			Console.WriteLine($"Total Agent Types in Instance: {agentTypeResponseList.Count}");
+			return agentTypeResponseList;
 		}
 
-		public List<Agent> GetAgentByName(IAgentManager agentManager, string agentName)
+		private async Task<bool> CheckIfAtLeastSingleInstanceOfAgentExistsAsync(IObjectManager objectManager, string agentName)
 		{
-			if (agentManager == null)
-			{
-				throw new ArgumentNullException(nameof(agentManager));
-			}
-			if (agentName == null)
-			{
-				throw new ArgumentNullException(nameof(agentName));
-			}
-			if (string.IsNullOrWhiteSpace(agentName))
-			{
-				throw new ArgumentException($"{nameof(agentName)} cannot be an empty string.");
-			}
+			List<int> agentArtifactIds = await GetAgentArtifactIdsAsync(objectManager, agentName);
 
-			try
+			bool doesAgentExists = agentArtifactIds.Count > 0;
+			return doesAgentExists;
+		}
+
+		private async Task<List<int>> GetAgentArtifactIdsAsync(IObjectManager objectManager, string agentName)
+		{
+			List<int> agentArtifactIds = new List<int>();
+
+			QueryRequest agentQueryRequest = new QueryRequest
 			{
-				Relativity.Services.Query agentQuery = new Relativity.Services.Query
+				ObjectType = new ObjectTypeRef
 				{
-					Condition = $"'Name' LIKE '{agentName}'"
-				};
-
-				AgentQueryResultSet agentQueryResultSet = agentManager.QueryAsync(agentQuery).Result;
-
-				if (agentQueryResultSet?.Results == null)
+					Name = Constants.Agents.AGENT_OBJECT_TYPE
+				},
+				Fields = new List<FieldRef>
 				{
-					throw new SmokeTestException($"An error occured when querying for agent. QueryAsync. [{nameof(agentName)} = {agentName}].");
-				}
+					new FieldRef
+					{
+						Name = Constants.Agents.AGENT_FIELD_NAME
+					}
+				},
+				Condition = $"(('{Constants.Agents.AGENT_FIELD_NAME}' LIKE '{agentName}'))"
+			};
 
-				List<Agent> agents = new List<Agent>();
-				agents.AddRange(agentQueryResultSet.Results.Select(x => x.Artifact));
-				return agents;
+			QueryResult agentQueryResult = await objectManager.QueryAsync(
+				Constants.Agents.EDDS_WORKSPACE_ARTIFACT_ID,
+				agentQueryRequest,
+				1,
+				3);
 
-			}
-			catch (Exception ex)
+			if (agentQueryResult.Objects.Count > 0)
 			{
-				throw new SmokeTestException($"An error occured when querying for agent. [{nameof(agentName)} = {agentName}].", ex);
+				agentArtifactIds.AddRange(agentQueryResult.Objects.Select(x => x.ArtifactID).ToList());
 			}
+
+			return agentArtifactIds;
 		}
 
-		public int GetFirstAgentServerArtifactId(IAgentManager agentManager)
+		private async Task<List<AgentServerResponse>> GetAgentServersForAgentTypeAsync(Relativity.Services.Interfaces.Agent.IAgentManager agentManager, int agentTypeArtifactId)
 		{
-			if (agentManager == null)
-			{
-				throw new ArgumentNullException(nameof(agentManager));
-			}
-
-			try
-			{
-				List<ResourceServer> agentServers = agentManager.GetAgentServersAsync().Result;
-				int agentServerId = agentServers.First().ArtifactID;
-				return agentServerId;
-			}
-			catch (Exception ex)
-			{
-				throw new SmokeTestException($"An error occured when querying for first agent server id.", ex);
-			}
+			List<AgentServerResponse> agentServerResponseList = await agentManager.GetAvailableAgentServersAsync(Constants.Agents.EDDS_WORKSPACE_ARTIFACT_ID, agentTypeArtifactId);
+			Console.WriteLine($"Total Available Agent Servers for Agent Type: {agentServerResponseList.Count}");
+			return agentServerResponseList;
 		}
 
-		public int GetAgentTypeArtifactId(IAgentManager agentManager, string agentName)
+		private async Task<int> CreateAgentAsync(Relativity.Services.Interfaces.Agent.IAgentManager agentManager, int agentTypeArtifactId, int agentServerArtifactId, decimal defaultInterval, int defaultLoggingLevel)
 		{
-			if (agentManager == null)
+			AgentRequest newAgentRequest = new AgentRequest
 			{
-				throw new ArgumentNullException(nameof(agentManager));
-			}
-			if (agentName == null)
-			{
-				throw new ArgumentNullException(nameof(agentName));
-			}
+				Enabled = Constants.Agents.ENABLE_AGENT,
+				Interval = defaultInterval,
+				Keywords = Constants.Agents.KEYWORDS,
+				Notes = Constants.Agents.NOTES,
+				LoggingLevel = defaultLoggingLevel,
+				AgentType = new Securable<ObjectIdentifier>(
+					new ObjectIdentifier
+					{
+						ArtifactID = agentTypeArtifactId
+					}),
+				AgentServer = new Securable<ObjectIdentifier>(
+					new ObjectIdentifier
+					{
+						ArtifactID = agentServerArtifactId
+					})
+			};
 
-			try
-			{
-				List<AgentTypeRef> agentServers = agentManager.GetAgentTypesAsync().Result;
-				int agentTypeId = agentServers.First(x => x.Name.Equals(agentName)).ArtifactID;
-				return agentTypeId;
-			}
-			catch (Exception ex)
-			{
-				throw new SmokeTestException($"An error occured when querying for '{agentName}' agent.", ex);
-			}
+			int newAgentArtifactId = await agentManager.CreateAsync(Constants.Agents.EDDS_WORKSPACE_ARTIFACT_ID, newAgentRequest);
+			Console.WriteLine($"{nameof(newAgentArtifactId)}: {newAgentArtifactId}");
+			return newAgentArtifactId;
 		}
 	}
 }

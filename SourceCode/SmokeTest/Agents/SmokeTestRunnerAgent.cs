@@ -4,7 +4,7 @@ using Relativity.DocumentViewer.Services;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
-using Relativity.Services.Agent;
+using Relativity.Services.Objects;
 using Relativity.Services.ResourcePool;
 using Relativity.Services.Search;
 using SmokeTest.Exceptions;
@@ -28,7 +28,8 @@ namespace SmokeTest.Agents
 			{
 				ExecutionIdentity systemExecutionIdentity = ExecutionIdentity.System;
 				IRSAPIClient rsapiClient = Helper.GetServicesManager().CreateProxy<IRSAPIClient>(systemExecutionIdentity);
-				IAgentManager agentManager = Helper.GetServicesManager().CreateProxy<IAgentManager>(systemExecutionIdentity);
+				Relativity.Services.Interfaces.Agent.IAgentManager agentManager = Helper.GetServicesManager().CreateProxy<Relativity.Services.Interfaces.Agent.IAgentManager>(systemExecutionIdentity);
+				IObjectManager objectManager = Helper.GetServicesManager().CreateProxy<IObjectManager>(systemExecutionIdentity);
 				IProductionManager productionManager = Helper.GetServicesManager().CreateProxy<IProductionManager>(systemExecutionIdentity);
 				IProductionDataSourceManager productionDataSourceManager = Helper.GetServicesManager().CreateProxy<IProductionDataSourceManager>(systemExecutionIdentity);
 				IKeywordSearchManager keywordSearchManager = Helper.GetServicesManager().CreateProxy<IKeywordSearchManager>(systemExecutionIdentity);
@@ -56,6 +57,7 @@ namespace SmokeTest.Agents
 							SmokeTestCollection smokeTestCollection = new SmokeTestCollection(
 									rsapiClient: rsapiClient,
 									agentManager: agentManager,
+									objectManager: objectManager,
 									productionManager: productionManager,
 									productionDataSourceManager: productionDataSourceManager,
 									keywordSearchManager: keywordSearchManager,
