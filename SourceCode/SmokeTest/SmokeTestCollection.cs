@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Relativity.Services.Interfaces.DtSearchIndexManager;
 using IAgentHelper = SmokeTest.Interfaces.IAgentHelper;
 
 namespace SmokeTest
@@ -43,11 +44,14 @@ namespace SmokeTest
 		public int WorkspaceArtifactId { get; set; }
 		public int DocumentIdentifierFieldArtifactId { get; set; }
 		public IRdoHelper RdoHelper { get; set; }
+		public IdtSearchManager DtSearchManager { get; set; }
+		public IDtSearchIndexManager DtSearchIndexManager { get; set; }
+		public string RelativityUrl { get; set; }
 
 
 		public SmokeTestCollection(IRSAPIClient rsapiClient, Relativity.Services.Interfaces.Agent.IAgentManager agentManager, IObjectManager objectManager, IProductionManager productionManager,
 				IProductionDataSourceManager productionDataSourceManager, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolManager, IProcessingJobManager processingJobManager,
-				IKeywordSearchManager keywordSearchManager, IDocumentViewerServiceManager documentViewerServiceManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, IDBContext workspaceDbContext, int workspaceArtifactId, int documentIdentifierFieldArtifactId)
+				IKeywordSearchManager keywordSearchManager, IDocumentViewerServiceManager documentViewerServiceManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, IDBContext workspaceDbContext, IdtSearchManager dtSearchManager, IDtSearchIndexManager dtSearchIndexManager, int workspaceArtifactId, int documentIdentifierFieldArtifactId, string relativityUrl)
 		{
 			RsapiClient = rsapiClient;
 			AgentManager = agentManager;
@@ -65,9 +69,12 @@ namespace SmokeTest
 			ResourcePoolManager = resourcePoolManager;
 			ProcessingJobManager = processingJobManager;
 			WorkspaceDbContext = workspaceDbContext;
+			DtSearchManager = dtSearchManager;
+			DtSearchIndexManager = dtSearchIndexManager;
 			WorkspaceArtifactId = workspaceArtifactId;
 			DocumentIdentifierFieldArtifactId = documentIdentifierFieldArtifactId;
 			RdoHelper = new RdoHelper();
+			RelativityUrl = relativityUrl;
 		}
 
 		public void Run()
@@ -300,7 +307,7 @@ namespace SmokeTest
 			ResultModel imageResultModel;
 			try
 			{
-				IViewerHelper viewerHelper = new ViewerHelper();
+				IViewerHelper viewerHelper = new ViewerHelper(RsapiClient, DocumentViewerServiceManager, WorkspaceDbContext);
 				RsapiClient.APIOptions.WorkspaceID = WorkspaceArtifactId;
 				if (!SavedSearchHelper.DocumentsExistInWorkspace(RsapiClient, WorkspaceArtifactId))
 				{
@@ -320,7 +327,9 @@ namespace SmokeTest
 						searchName: Constants.AllDocumentsSavedSearchName,
 						controlNumbers: new List<string>());
 
-					imageResultModel = viewerHelper.ConvertDocumentsForViewer(RsapiClient, DocumentViewerServiceManager, WorkspaceDbContext, WorkspaceArtifactId);
+					imageResultModel = viewerHelper.ConvertDocumentsForViewer(WorkspaceArtifactId);
+
+					// Delete saved search
 				}
 			}
 			catch (Exception ex)
@@ -417,7 +426,7 @@ namespace SmokeTest
 
 		public ResultModel DataGridTest()
 		{
-			DataGridHelper dataGridHelper = new DataGridHelper(RsapiClient);
+			DataGridHelper dataGridHelper = new DataGridHelper(RsapiClient, KeywordSearchManager, DtSearchManager, DtSearchIndexManager, RelativityUrl);
 			return dataGridHelper.VerifyDataGridFunctionality(WorkspaceArtifactId);
 		}
 	}

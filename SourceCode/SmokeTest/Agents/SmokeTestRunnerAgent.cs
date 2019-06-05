@@ -12,6 +12,7 @@ using SmokeTest.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using Relativity.Services.Interfaces.DtSearchIndexManager;
 
 namespace SmokeTest.Agents
 {
@@ -43,6 +44,8 @@ namespace SmokeTest.Agents
 				IResourcePoolManager resourcePoolManager = Helper.GetServicesManager().CreateProxy<IResourcePoolManager>(systemExecutionIdentity);
 				IProcessingJobManager processingJobManager = Helper.GetServicesManager().CreateProxy<IProcessingJobManager>(systemExecutionIdentity);
 				IDBContext eddsDbContext = Helper.GetDBContext(-1);
+				IdtSearchManager dtSearchManager = Helper.GetServicesManager().CreateProxy<IdtSearchManager>(systemExecutionIdentity);
+				IDtSearchIndexManager dtSearchIndexManager = Helper.GetServicesManager().CreateProxy<IDtSearchIndexManager>(systemExecutionIdentity);
 				List<int> workspaceArtifactIds = RetrieveAllApplicationWorkspaces(eddsDbContext, Constants.Guids.Application.SmokeTest);
 
 				foreach (int currentWorkspaceArtifactId in workspaceArtifactIds)
@@ -53,6 +56,7 @@ namespace SmokeTest.Agents
 						{
 							RaiseMessage($"Running Smoke tests in Workspace [{currentWorkspaceArtifactId}]", 1);
 							IDBContext workspaceDbContext = Helper.GetDBContext(currentWorkspaceArtifactId);
+							string relativityUrl = "https://localhost/Relativity";
 							int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(workspaceDbContext, currentWorkspaceArtifactId);
 							SmokeTestCollection smokeTestCollection = new SmokeTestCollection(
 									rsapiClient: rsapiClient,
@@ -71,8 +75,11 @@ namespace SmokeTest.Agents
 									resourcePoolManager: resourcePoolManager,
 									processingJobManager: processingJobManager,
 									workspaceDbContext: workspaceDbContext,
+									dtSearchManager: dtSearchManager,
+									dtSearchIndexManager: dtSearchIndexManager,
 									workspaceArtifactId: currentWorkspaceArtifactId,
-									documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId);
+									documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId,
+									relativityUrl: relativityUrl);
 							smokeTestCollection.Run();
 						}
 						catch (Exception ex)

@@ -13,6 +13,7 @@ namespace SmokeTest.Tests
 		public static readonly string SqlPassword = "Test1234!";
 		public static readonly Uri RsapiUri = new Uri($"http://{Constants.ServerName}/Relativity.Services");
 		public static readonly Uri RestUri = new Uri($"http://{Constants.ServerName}/Relativity.Rest/Api");
+		public static readonly string RelativityUrl = $"http://{Constants.ServerName}/Relativity";
 		public static readonly UsernamePasswordCredentials RelativityUsernamePasswordCredentials = new UsernamePasswordCredentials(Constants.RelativityLogin, Constants.RelativityPassword);
 		public static readonly ServiceFactorySettings ServiceFactorySettings = new ServiceFactorySettings(Constants.RsapiUri, Constants.RestUri,
 			Constants.RelativityUsernamePasswordCredentials);

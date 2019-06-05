@@ -7,6 +7,6 @@ namespace SmokeTest.Interfaces
 {
 	public interface IViewerHelper
 	{
-		ResultModel ConvertDocumentsForViewer(IRSAPIClient rsapiClient, IDocumentViewerServiceManager documentViewerServiceManager, IDBContext workspaceDbContext, int workspaceArtifactId);
+		ResultModel ConvertDocumentsForViewer(int workspaceArtifactId);
 	}
 }

@@ -6,6 +6,7 @@ using Relativity.DocumentViewer.Services;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
+using Relativity.Services.Interfaces.DtSearchIndexManager;
 using Relativity.Services.Objects;
 using Relativity.Services.ResourcePool;
 using Relativity.Services.Search;
@@ -34,6 +35,8 @@ namespace SmokeTest.Tests
 		public IProcessingDataSourceManager ProcessingDataSourceManager { get; set; }
 		public IResourcePoolManager ResourcePoolManager { get; set; }
 		public IProcessingJobManager ProcessingJobManager { get; set; }
+		public IdtSearchManager DtSearchManager { get; set; }
+		public IDtSearchIndexManager DtSearchIndexManager { get; set; }
 
 		[SetUp]
 		public void SetUp()
@@ -54,8 +57,9 @@ namespace SmokeTest.Tests
 			ImagingProfileManager = ServiceFactory.CreateProxy<IImagingProfileManager>();
 			ImagingSetManager = ServiceFactory.CreateProxy<IImagingSetManager>();
 			ImagingJobManager = ServiceFactory.CreateProxy<IImagingJobManager>();
+			DtSearchManager = ServiceFactory.CreateProxy<IdtSearchManager>();
+			DtSearchIndexManager = ServiceFactory.CreateProxy<IDtSearchIndexManager>();
 			IDBContext workspaceDbContext = new DbContext("serverName", "databaseName", "sqlServerUsername", "sqlServerPassword");
-
 			int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(Constants.WorkspaceArtifactId);
 			Sut = new SmokeTestCollection(
 					rsapiClient: RsapiClient,
@@ -73,9 +77,12 @@ namespace SmokeTest.Tests
 					processingDataSourceManager: ProcessingDataSourceManager,
 					resourcePoolManager: ResourcePoolManager,
 					processingJobManager: ProcessingJobManager,
+					dtSearchManager: DtSearchManager,
+					dtSearchIndexManager: DtSearchIndexManager,
 					workspaceDbContext: workspaceDbContext,
 					workspaceArtifactId: Constants.WorkspaceArtifactId,
-					documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId);
+					documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId,
+					relativityUrl: Constants.RelativityUrl);
 		}
 
 		[TearDown]

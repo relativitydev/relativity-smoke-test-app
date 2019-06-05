@@ -129,6 +129,7 @@
     <Compile Include="Helpers\UserHelper.cs" />
     <Compile Include="Interfaces\IGroupHelper.cs" />
     <Compile Include="Interfaces\IFieldHelper.cs" />
+    <Compile Include="Models\AuditQueryRequestModel.cs" />
     <Compile Include="Models\ClientModel.cs" />
     <Compile Include="Models\MarkupSetModel.cs" />
     <Compile Include="Models\ProductionModel.cs" />
