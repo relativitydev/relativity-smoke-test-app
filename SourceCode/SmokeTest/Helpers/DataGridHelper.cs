@@ -19,6 +19,7 @@ using Relativity.Services.Interfaces.ObjectRules;
 using Relativity.Services.Search;
 using Relativity.Services.SearchIndex;
 using Relativity.Services.User;
+using System.Threading;
 
 namespace SmokeTest.Helpers
 {
@@ -82,6 +83,7 @@ namespace SmokeTest.Helpers
 
 							// Build dtSearch Index
 							BuildDtSearchIndex(workspaceID, dtSearchIndexArtifactId).Wait();
+							WaitForDtSearchIndexToBeActive(workspaceID, dtSearchIndexArtifactId).Wait();
 
 							// Create dtSearch
 							int dtSearchId = CreateDtSearch(workspaceID).Result;
@@ -259,6 +261,30 @@ namespace SmokeTest.Helpers
 			catch (Exception ex)
 			{
 				throw new Exception("An error occured when building DtSearch Index", ex);
+			}
+		}
+
+		private async Task WaitForDtSearchIndexToBeActive(int workspaceID, int dtSearchIndexArtifactId)
+		{
+			try
+			{
+				const int count = 60;
+				const int waitingSeconds = 1;
+				int i = 0;
+				while(i < count)
+				{
+					DtSearchIndexStatus dtSearchIndexStatus = await DtSearchIndexManager.GetIndexIDAndStatusAsync(workspaceID, dtSearchIndexArtifactId);
+					if (dtSearchIndexStatus.Status == "Indexed")
+					{
+						break;
+					}
+					Thread.Sleep(waitingSeconds * 5 * 1000);
+					i++;
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new Exception("An error occured when waiting for the DtSearch Index to be Active");
 			}
 		}
 

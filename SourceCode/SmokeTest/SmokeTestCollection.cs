@@ -284,10 +284,7 @@ namespace SmokeTest
 
 					imageResultModel = imageHelper.ImageDocuments(WorkspaceArtifactId);
 
-					if (imageResultModel.Success)
-					{
-						bool savedSearchDeleteResult = SavedSearchHelper.DeleteKeywordSearch(KeywordSearchManager, savedSearchArtifactId, WorkspaceArtifactId).Result;
-					}
+					SavedSearchHelper.DeleteKeywordSearch(KeywordSearchManager, savedSearchArtifactId, WorkspaceArtifactId).Wait();
 				}
 			}
 			catch (Exception ex)
@@ -329,7 +326,7 @@ namespace SmokeTest
 
 					imageResultModel = viewerHelper.ConvertDocumentsForViewer(WorkspaceArtifactId);
 
-					// Delete saved search
+					SavedSearchHelper.DeleteKeywordSearch(KeywordSearchManager, savedSearchArtifactId, WorkspaceArtifactId).Wait();
 				}
 			}
 			catch (Exception ex)
