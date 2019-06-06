@@ -55,6 +55,7 @@ namespace SmokeTest.Helpers
 					int singleDocumentArtifactId = GetSingleDocumentForConversion(workspaceArtifactId);
 					long? previousMaxCacheEntryId = GetMaxCacheId(singleDocumentArtifactId);
 					GetViewerContentKeyAsync(workspaceArtifactId, singleDocumentArtifactId).Wait();
+					Thread.Sleep(30000); // Sleeping 30 seconds to allow for file to cache
 					long? newMaxCacheEntryId = GetMaxCacheId(singleDocumentArtifactId);
 
 					// Verify if the document has been converted without any errors
