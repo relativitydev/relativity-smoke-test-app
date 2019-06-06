@@ -25,12 +25,14 @@ namespace SmokeTest.Helpers
 		public IRSAPIClient RsapiClient;
 		public IDocumentViewerServiceManager DocumentViewerServiceManager;
 		public IDBContext WorkspaceDbContext;
+		public string RelativityUrl;
 
-		public ViewerHelper(IRSAPIClient rsapiClient, IDocumentViewerServiceManager documentViewerServiceManager, IDBContext workspaceDbContext)
+		public ViewerHelper(IRSAPIClient rsapiClient, IDocumentViewerServiceManager documentViewerServiceManager, IDBContext workspaceDbContext, string relativityUrl)
 		{
 			RsapiClient = rsapiClient;
 			DocumentViewerServiceManager = documentViewerServiceManager;
 			WorkspaceDbContext = workspaceDbContext;
+			RelativityUrl = relativityUrl;
 		}
 
 		public ResultModel ConvertDocumentsForViewer(int workspaceArtifactId)
@@ -51,11 +53,12 @@ namespace SmokeTest.Helpers
 				{
 					// Convert Document
 					int singleDocumentArtifactId = GetSingleDocumentForConversion(workspaceArtifactId);
-					int cacheEntryId = GetViewerContentKeyAsync(workspaceArtifactId, singleDocumentArtifactId).Result;
+					long? previousMaxCacheEntryId = GetMaxCacheId(singleDocumentArtifactId);
+					GetViewerContentKeyAsync(workspaceArtifactId, singleDocumentArtifactId).Wait();
+					long? newMaxCacheEntryId = GetMaxCacheId(singleDocumentArtifactId);
 
 					// Verify if the document has been converted without any errors
-					//long? cacheEntryId = viewerContentKey.CacheEntryId;
-					bool isDocumentConversionSuccessful = VerifyIfDocumentConversionWasSuccessful(cacheEntryId);
+					bool isDocumentConversionSuccessful = VerifyIfDocumentConversionWasSuccessful(previousMaxCacheEntryId, newMaxCacheEntryId);
 					if (isDocumentConversionSuccessful)
 					{
 						// Set resultModel properties
@@ -98,43 +101,48 @@ namespace SmokeTest.Helpers
 			}
 		}
 
-		private async Task<int> GetViewerContentKeyAsync(int workspaceArtifactId, int documentArtifactId)
+		private async Task GetViewerContentKeyAsync(int workspaceArtifactId, int documentArtifactId)
 		{
 			string errorContext = $"An error occured during document conversion. [{nameof(documentArtifactId)}: {documentArtifactId}]";
 
 			try
 			{
-				try
-				{
-					//JObject resultObject = await CallGetViewerContentKeyAsync(workspaceArtifactId, documentArtifactId);
-					//IDictionary<string, JToken> dictionary = resultObject;
-					//if (dictionary.ContainsKey("CacheEntryId"))
-					//{
-					//	cacheId = resultObject["CacheEntryId"].Value<int>();
-					//	return cacheId
-					//}
-					// Keep checking the value for 5 mins.
-					const int count = 10;
-					const int waitingSeconds = 1;
+				HttpClient client = new HttpClient();
+				client.BaseAddress = new Uri(RelativityUrl);
+				client.DefaultRequestHeaders.Add("X-CSRF-Header", string.Empty);
+				client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GenerateAuthToken());
+				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-					for (int i = 1; i <= count; i++)
-					{
-						JObject resultObject = await CallGetViewerContentKeyAsync(workspaceArtifactId, documentArtifactId);
-						IDictionary<string, JToken> dictionary = resultObject;
-						if (dictionary.ContainsKey("CacheEntryId"))
-						{
-							int cacheId = resultObject["CacheEntryId"].Value<int>();
-							return cacheId;
-						}
-						Thread.Sleep(waitingSeconds * 30 * 1000);
-					}
-
-					throw new Exception("Error getting CacheEntryId");
-				}
-				catch (Exception ex)
+				ViewerContentKey viewerContentKey = null;
+				GetViewerContentKeyOptions options = new GetViewerContentKeyOptions
 				{
-					throw new SmokeTestException($"{errorContext}. GetViewerContentKeyAsync.", ex);
+					ForceConversion = true,
+					ClientId = "DocumentViewer.Conversion.PreConvert",
+				};
+				GetViewerContentKeyRequest parameters = new GetViewerContentKeyRequest
+				{
+					WorkspaceId = workspaceArtifactId,
+					DocumentIds = new[] { documentArtifactId },
+					ConversionType = ConversionType.Image,
+					Priority = PriorityLevel.OnTheFly,
+					Options = options,
+				};
+
+				dynamic requestParameters = new ExpandoObject();
+				requestParameters.request = parameters;
+				string jsonParameters = JsonConvert.SerializeObject(requestParameters);
+
+				StringContent parameterStringContent = new StringContent(jsonParameters, System.Text.Encoding.UTF8, "application/json");
+
+				//Make the HTTP request.
+				String dvsUrl = "Relativity.REST/api/Relativity.DocumentViewer.Services.IDocumentViewerServiceModule/DocumentViewerServiceManager/GetViewerContentKeyAsync";
+				HttpResponseMessage response = await client.PostAsync(dvsUrl, parameterStringContent);
+				bool success = response.StatusCode == HttpStatusCode.OK;
+				if (!success)
+				{
+					throw new Exception("An error occured Getting Viewer Content Key");
 				}
+				string result = response.Content.ReadAsStringAsync().Result;
 			}
 			catch (Exception ex)
 			{
@@ -142,90 +150,53 @@ namespace SmokeTest.Helpers
 			}
 		}
 
-		private async Task<JObject> CallGetViewerContentKeyAsync(int workspaceArtifactId, int documentArtifactId)
+		private long? GetMaxCacheId(int documentId)
 		{
-			HttpClient client = new HttpClient();
-			client.BaseAddress = new Uri($@"http://172.19.213.148/Relativity");
-			client.DefaultRequestHeaders.Add("X-CSRF-Header", string.Empty);
-			client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GenerateAuthToken());
-			client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-			ViewerContentKey viewerContentKey = null;
-			GetViewerContentKeyOptions options = new GetViewerContentKeyOptions
-			{
-				ForceConversion = true,
-				ClientId = "DocumentViewer.Conversion.PreConvert",
-			};
-			GetViewerContentKeyRequest parameters = new GetViewerContentKeyRequest
-			{
-				WorkspaceId = workspaceArtifactId,
-				DocumentIds = new[] { documentArtifactId },
-				ConversionType = ConversionType.Image,
-				Priority = PriorityLevel.OnTheFly,
-				Options = options,
-			};
-
-			dynamic requestParameters = new ExpandoObject();
-			requestParameters.request = parameters;
-			string jsonParameters = JsonConvert.SerializeObject(requestParameters);
-
-			StringContent parameterStringContent = new StringContent(jsonParameters, System.Text.Encoding.UTF8, "application/json");
-
-			//Make the HTTP request.
-			String dvsUrl = "Relativity.REST/api/Relativity.DocumentViewer.Services.IDocumentViewerServiceModule/DocumentViewerServiceManager/GetViewerContentKeyAsync";
-			HttpResponseMessage response = await client.PostAsync(dvsUrl, parameterStringContent);
-			bool success = response.StatusCode == HttpStatusCode.OK;
-			if (!success)
-			{
-				throw new Exception("An error occured Getting Viewer Content Key");
-			}
-			string result = response.Content.ReadAsStringAsync().Result;
-			JObject resultObject = JObject.Parse(result);
-			return resultObject;
-		}
-
-		private bool VerifyIfDocumentConversionWasSuccessful(long cacheEntryId)
-		{
-			string errorContext = $"An error occured when checking Document Conversion status in ConvertedCacheFile table. [{nameof(cacheEntryId)}: {cacheEntryId}]";
-
 			try
 			{
 				string sql = @"
 										SELECT 
-												TOP 1 [ErrorID] 
+												MAX([CacheID]) 
 										FROM 
-												[EDDSDBO].[ConvertedCacheFile] WITH(NOLOCK) 
+												[EDDSDBO].[ConvertedCacheFile] WITH(NOLOCK)
 										WHERE 
-												[CacheID] = @cacheEntryId";
-
-				List<SqlParameter> sqlParams = new List<SqlParameter>
-								{
-										new SqlParameter("@cacheEntryId", SqlDbType.BigInt) {Value = cacheEntryId}
-								};
+												[DocumentID] = @documentId";
+				SqlParameter sqlParameter = new SqlParameter
+				{
+					ParameterName = "@documentId",
+					SqlDbType = SqlDbType.Int,
+					Value = documentId
+				};
 
 				try
 				{
-					DataTable dataTable = WorkspaceDbContext.ExecuteSqlStatementAsDataTable(sql, sqlParams);
-					if (dataTable != null)
-					{
-						object errorId = dataTable.Rows[0][0];
-						if (errorId == DBNull.Value)
-						{
-							return true;
-						}
-					}
+					long? cacheId = WorkspaceDbContext.ExecuteSqlStatementAsScalar<long?>(sql, sqlParameter);
+					return cacheId;
 				}
 				catch (Exception ex)
 				{
-					throw new SmokeTestException($"{errorContext}. ExecuteSqlStatementAsScalar.", ex);
+					throw new SmokeTestException($"An error occured calling ExecuteSqlStatementAsScalar.", ex);
 				}
-
-				return false;
 			}
 			catch (Exception ex)
 			{
-				throw new SmokeTestException($"{errorContext}", ex);
+				throw new SmokeTestException($"An error occured getting the Max CacheId", ex);
 			}
+		}
+
+		private bool VerifyIfDocumentConversionWasSuccessful(long? previousMaxCacheEntryId, long? newMaxCacheEntryId)
+		{
+			if (previousMaxCacheEntryId.HasValue && newMaxCacheEntryId.HasValue)
+			{
+				return newMaxCacheEntryId.Value > previousMaxCacheEntryId.Value;
+			}
+
+			if (newMaxCacheEntryId.HasValue)
+			{
+				return true;
+			}
+
+			return false;
 		}
 
 		private string GenerateAuthToken()

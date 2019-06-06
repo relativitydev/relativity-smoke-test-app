@@ -326,7 +326,7 @@ namespace SmokeTest.Helpers
 		}
 
 
-		private int CreateProcessingDataSource(int workspaceId, int custodianId, int processingSetId, int timeZoneId, int destinationFolderArtifactId, string processingSource)
+		private void CreateProcessingDataSource(int workspaceId, int custodianId, int processingSetId, int timeZoneId, int destinationFolderArtifactId, string processingSource)
 		{
 			try
 			{
@@ -343,7 +343,7 @@ namespace SmokeTest.Helpers
 					Name = "Processing Set 1"
 				};
 
-				return ProcessingDataSourceManager.SaveAsync(processingDataSource, workspaceId).Result;
+				ProcessingDataSourceManager.SaveAsync(processingDataSource, workspaceId).Wait();
 			}
 			catch (Exception e)
 			{

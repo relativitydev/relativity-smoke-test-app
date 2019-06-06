@@ -304,7 +304,7 @@ namespace SmokeTest
 			ResultModel imageResultModel;
 			try
 			{
-				IViewerHelper viewerHelper = new ViewerHelper(RsapiClient, DocumentViewerServiceManager, WorkspaceDbContext);
+				IViewerHelper viewerHelper = new ViewerHelper(RsapiClient, DocumentViewerServiceManager, WorkspaceDbContext, RelativityUrl);
 				RsapiClient.APIOptions.WorkspaceID = WorkspaceArtifactId;
 				if (!SavedSearchHelper.DocumentsExistInWorkspace(RsapiClient, WorkspaceArtifactId))
 				{

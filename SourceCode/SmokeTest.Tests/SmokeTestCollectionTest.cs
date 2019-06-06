@@ -59,7 +59,7 @@ namespace SmokeTest.Tests
 			ImagingJobManager = ServiceFactory.CreateProxy<IImagingJobManager>();
 			DtSearchManager = ServiceFactory.CreateProxy<IdtSearchManager>();
 			DtSearchIndexManager = ServiceFactory.CreateProxy<IDtSearchIndexManager>();
-			IDBContext workspaceDbContext = new DbContext("serverName", "databaseName", "sqlServerUsername", "sqlServerPassword");
+			IDBContext workspaceDbContext = new DbContext(Constants.ServerName, $"EDDS{Constants.WorkspaceArtifactId}", Constants.SqlLogin, Constants.SqlPassword);
 			int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(Constants.WorkspaceArtifactId);
 			Sut = new SmokeTestCollection(
 					rsapiClient: RsapiClient,
