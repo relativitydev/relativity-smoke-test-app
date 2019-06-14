@@ -514,48 +514,6 @@ namespace SmokeTest.Helpers
 			}
 		}
 
-
-		private void CreateDocument()
-		{
-			try
-			{
-				var identifier = "Sample Document from DataGrid Test" + Guid.NewGuid();
-				var newDocument = new kCura.Relativity.Client.DTOs.Document()
-				{
-					Fields = new List<FieldValue>
-										{
-												new FieldValue(DocumentFieldNames.TextIdentifier, identifier),
-												new FieldValue(DocumentFieldNames.RelativityNativeFileLocation, "C:\\Windows\\win.ini")
-										}
-				};
-				var documentArtifactID = RsapiClient.Repositories.Document.CreateSingle(newDocument);
-				UpdatedDataGridFieldValue(documentArtifactID, DataGridFieldName, DataGridFieldValue);
-			}
-			catch (Exception ex)
-			{
-				throw new Exception("Error Creating Document for Data Grid Test", ex);
-			}
-		}
-
-		private void UpdatedDataGridFieldValue(int documentArtifactID, string fieldName, object fieldValue)
-		{
-			try
-			{
-				var document = new kCura.Relativity.Client.DTOs.Document(documentArtifactID)
-				{
-					Fields = new List<FieldValue>
-										{
-												new FieldValue(fieldName, fieldValue),
-										}
-				};
-				RsapiClient.Repositories.Document.Update(document);
-			}
-			catch (Exception ex)
-			{
-				throw new Exception("Error Updating Document for Data Grid Test", ex);
-			}
-		}
-
 		private string GenerateAuthToken()
 		{
 			try
@@ -566,42 +524,6 @@ namespace SmokeTest.Helpers
 			catch (Exception ex)
 			{
 				throw new Exception("Error Generating Auth Token", ex);
-			}
-		}
-
-		private bool FindDocumentWithLuceneSearchRest(string serverName, int workspaceArtifactID, string fieldName, string searchValue)
-		{
-			try
-			{
-				var retVal = false;
-				HttpClient client = new HttpClient();
-				client.BaseAddress = new Uri($@"http://{serverName}/");
-				client.DefaultRequestHeaders.Add("X-CSRF-Header", string.Empty);
-				client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GenerateAuthToken());
-				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-				HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $@"/Relativity.Rest/Workspace/{workspaceArtifactID}/Document/QueryResult");
-				request.Content = new StringContent("{\"condition\": \"'" + fieldName + "' LUCENESEARCH '" + searchValue + "'\",\"fields\":[\"*\"]}", Encoding.UTF8, "application/json");
-
-				var result = client.SendAsync(request).Result;
-				if (result.StatusCode != HttpStatusCode.Created)
-				{
-					throw new Exception($@"Status Code:{result.StatusCode} Message:{result.Content.ReadAsStringAsync()}");
-				}
-				else
-				{
-					var joResponse = JObject.Parse(result.Content.ReadAsStringAsync().Result);
-					var numberOfDocumentsFound = Convert.ToInt32(joResponse["TotalResultCount"]);
-					if (numberOfDocumentsFound > 0)
-					{
-						retVal = true;
-					}
-				}
-				return retVal;
-			}
-			catch (Exception ex)
-			{
-				throw new Exception("Error executing lucene search", ex);
 			}
 		}
 	}
