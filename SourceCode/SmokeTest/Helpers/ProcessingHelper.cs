@@ -25,12 +25,12 @@ namespace SmokeTest.Helpers
 
 		public ProcessingHelper(IRSAPIClient client, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolMananger, IProcessingJobManager processingJobManager)
 		{
-			RsapiClient = client;
-			ProcessingCustodianManager = processingCustodianManager;
-			ProcessingSetManager = processingSetManager;
-			ProcessingDataSourceManager = processingDataSourceManager;
-			ResourcePoolMananger = resourcePoolMananger;
-			ProcessingJobManager = processingJobManager;
+			RsapiClient = client ?? throw new ArgumentNullException(nameof(client));
+			ProcessingCustodianManager = processingCustodianManager ?? throw new ArgumentNullException(nameof(processingCustodianManager));
+			ProcessingSetManager = processingSetManager ?? throw new ArgumentNullException(nameof(processingSetManager));
+			ProcessingDataSourceManager = processingDataSourceManager ?? throw new ArgumentNullException(nameof(processingDataSourceManager));
+			ResourcePoolMananger = resourcePoolMananger ?? throw new ArgumentNullException(nameof(resourcePoolMananger));
+			ProcessingJobManager = processingJobManager ?? throw new ArgumentNullException(nameof(processingJobManager));
 		}
 
 		public ResultModel CreateAndRunProcessingSet(int workspaceID)

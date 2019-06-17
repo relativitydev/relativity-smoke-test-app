@@ -35,11 +35,12 @@ namespace SmokeTest.Helpers
 
 		public DataGridHelper(IRSAPIClient client, IKeywordSearchManager keywordSearchManager, IdtSearchManager dtSearchManager, IDtSearchIndexManager dtSearchIndexManager, string relativityUrl)
 		{
-			RsapiClient = client;
-			KeywordSearchManager = keywordSearchManager;
-			DtSearchManager = dtSearchManager;
-			DtSearchIndexManager = dtSearchIndexManager;
-			RelativityUrl = relativityUrl;
+			
+			RsapiClient = client ?? throw new ArgumentNullException(nameof(client));
+			KeywordSearchManager = keywordSearchManager ?? throw new ArgumentNullException(nameof(keywordSearchManager));
+			DtSearchManager = dtSearchManager ?? throw new ArgumentNullException(nameof(dtSearchManager));
+			DtSearchIndexManager = dtSearchIndexManager ?? throw new ArgumentNullException(nameof(dtSearchIndexManager));
+			RelativityUrl = relativityUrl ?? throw new ArgumentNullException(nameof(relativityUrl));
 		}
 
 		public ResultModel VerifyDataGridFunctionality(int workspaceID)

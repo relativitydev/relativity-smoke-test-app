@@ -29,10 +29,10 @@ namespace SmokeTest.Helpers
 
 		public ViewerHelper(IRSAPIClient rsapiClient, IDocumentViewerServiceManager documentViewerServiceManager, IDBContext workspaceDbContext, string relativityUrl)
 		{
-			RsapiClient = rsapiClient;
-			DocumentViewerServiceManager = documentViewerServiceManager;
-			WorkspaceDbContext = workspaceDbContext;
-			RelativityUrl = relativityUrl;
+			RsapiClient = rsapiClient ?? throw new ArgumentNullException(nameof(rsapiClient));
+			DocumentViewerServiceManager = documentViewerServiceManager ?? throw new ArgumentNullException(nameof(documentViewerServiceManager));
+			WorkspaceDbContext = workspaceDbContext ?? throw new ArgumentNullException(nameof(workspaceDbContext));
+			RelativityUrl = relativityUrl ?? throw new ArgumentNullException(nameof(relativityUrl));
 		}
 
 		public ResultModel ConvertDocumentsForViewer(int workspaceArtifactId)
