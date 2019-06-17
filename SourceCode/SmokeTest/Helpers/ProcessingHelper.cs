@@ -25,17 +25,18 @@ namespace SmokeTest.Helpers
 
 		public ProcessingHelper(IRSAPIClient client, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolMananger, IProcessingJobManager processingJobManager)
 		{
-			RsapiClient = client;
-			ProcessingCustodianManager = processingCustodianManager;
-			ProcessingSetManager = processingSetManager;
-			ProcessingDataSourceManager = processingDataSourceManager;
-			ResourcePoolMananger = resourcePoolMananger;
-			ProcessingJobManager = processingJobManager;
+			RsapiClient = client ?? throw new ArgumentNullException(nameof(client));
+			ProcessingCustodianManager = processingCustodianManager ?? throw new ArgumentNullException(nameof(processingCustodianManager));
+			ProcessingSetManager = processingSetManager ?? throw new ArgumentNullException(nameof(processingSetManager));
+			ProcessingDataSourceManager = processingDataSourceManager ?? throw new ArgumentNullException(nameof(processingDataSourceManager));
+			ResourcePoolMananger = resourcePoolMananger ?? throw new ArgumentNullException(nameof(resourcePoolMananger));
+			ProcessingJobManager = processingJobManager ?? throw new ArgumentNullException(nameof(processingJobManager));
 		}
 
 		public ResultModel CreateAndRunProcessingSet(int workspaceID)
 		{
 			var retVal = new ResultModel("ProcessingSet");
+			RsapiClient.APIOptions.WorkspaceID = workspaceID;
 
 			try
 			{
@@ -325,7 +326,7 @@ namespace SmokeTest.Helpers
 		}
 
 
-		private int CreateProcessingDataSource(int workspaceId, int custodianId, int processingSetId, int timeZoneId, int destinationFolderArtifactId, string processingSource)
+		private void CreateProcessingDataSource(int workspaceId, int custodianId, int processingSetId, int timeZoneId, int destinationFolderArtifactId, string processingSource)
 		{
 			try
 			{
@@ -342,7 +343,7 @@ namespace SmokeTest.Helpers
 					Name = "Processing Set 1"
 				};
 
-				return ProcessingDataSourceManager.SaveAsync(processingDataSource, workspaceId).Result;
+				ProcessingDataSourceManager.SaveAsync(processingDataSource, workspaceId).Wait();
 			}
 			catch (Exception e)
 			{

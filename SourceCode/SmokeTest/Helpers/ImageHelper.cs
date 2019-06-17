@@ -10,7 +10,11 @@ namespace SmokeTest.Helpers
 {
 	public class ImageHelper : IImageHelper
 	{
-		public ResultModel ImageDocuments(IRSAPIClient rsapiClient, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, int workspaceArtifactId)
+		public IRSAPIClient RsapiClient;
+		public IImagingProfileManager ImagingProfileManager;
+		public IImagingSetManager ImagingSetManager;
+		public IImagingJobManager ImagingJobManager;
+		public ImageHelper(IRSAPIClient rsapiClient, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager)
 		{
 			if (rsapiClient == null)
 			{
@@ -28,6 +32,15 @@ namespace SmokeTest.Helpers
 			{
 				throw new ArgumentNullException(nameof(imagingJobManager));
 			}
+
+			RsapiClient = rsapiClient;
+			ImagingProfileManager = imagingProfileManager;
+			ImagingSetManager = imagingSetManager;
+			ImagingJobManager = imagingJobManager;
+		}
+		
+		public ResultModel ImageDocuments(int workspaceArtifactId)
+		{
 			if (workspaceArtifactId < 1)
 			{
 				throw new ArgumentException($"{nameof(workspaceArtifactId)} should be a positive number.");
@@ -37,24 +50,25 @@ namespace SmokeTest.Helpers
 
 			try
 			{
-				rsapiClient.APIOptions.WorkspaceID = workspaceArtifactId;
+				RsapiClient.APIOptions.WorkspaceID = workspaceArtifactId;
 				int? imagingSetArtifactId = null;
+				int? imagingProfileArtifactId = null;
 
 				try
 				{
 					// Create Imaging Profile record
 					string imagingProfileName = $"{Constants.Prefix} - Imaging Profile - {DateTime.Now}";
-					int imagingProfileArtifactId = CreateImagingProfileRecord(imagingProfileManager, workspaceArtifactId, imagingProfileName);
+					imagingProfileArtifactId = CreateImagingProfileRecord(workspaceArtifactId, imagingProfileName);
 
 					// Create Imaging Set record
 					string imagingSetName = $"{Constants.Prefix} - Imaging Set - {DateTime.Now}";
-					imagingSetArtifactId = CreateImagingSetRecord(rsapiClient, imagingSetManager, workspaceArtifactId, imagingSetName, Constants.AllDocumentsSavedSearchName, imagingProfileArtifactId);
+					imagingSetArtifactId = CreateImagingSetRecord(workspaceArtifactId, imagingSetName, Constants.AllDocumentsSavedSearchName, imagingProfileArtifactId.Value);
 
 					// Run Imaging Set
-					RunImagingSet(imagingJobManager, workspaceArtifactId, imagingSetArtifactId.Value);
+					RunImagingSet(workspaceArtifactId, imagingSetArtifactId.Value);
 
 					// Wait to check if documents are imaged
-					bool areDocumentsImaged = CheckIfImagingSetIsCompleted(imagingSetManager, workspaceArtifactId, imagingSetArtifactId.Value);
+					bool areDocumentsImaged = CheckIfImagingSetIsCompleted(workspaceArtifactId, imagingSetArtifactId.Value);
 					if (!areDocumentsImaged)
 					{
 						throw new SmokeTestException("Documents were not successfully imaged. Imaging Set did not Complete.");
@@ -72,7 +86,7 @@ namespace SmokeTest.Helpers
 				{
 					if (imagingSetArtifactId != null)
 					{
-						DeleteImagingSet(imagingSetManager, imagingProfileManager, workspaceArtifactId, imagingSetArtifactId.Value);
+						DeleteImagingSet(workspaceArtifactId, imagingSetArtifactId.Value);
 					}
 				}
 			}
@@ -85,7 +99,7 @@ namespace SmokeTest.Helpers
 			return resultModel;
 		}
 
-		public void DeleteImagingSet(IImagingSetManager imagingSetManager, IImagingProfileManager imagingProfileManager, int workspaceArtifactId, int imagingSetArtifactId)
+		public void DeleteImagingSet(int workspaceArtifactId, int imagingSetArtifactId)
 		{
 			string errorContext = $"An error occured when deleting an Imaging Set [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]";
 			try
@@ -93,14 +107,14 @@ namespace SmokeTest.Helpers
 				Console.WriteLine($"Deleting Imaging Set and its associated Imaging Profile. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]");
 
 				// Retrieve Imaging Set
-				ImagingSet imagingSet = RetrieveImagingSetRecord(imagingSetManager, workspaceArtifactId, imagingSetArtifactId);
+				ImagingSet imagingSet = RetrieveImagingSetRecord(workspaceArtifactId, imagingSetArtifactId);
 
 				// Delete Imaging Set
-				DeleteImagingSetRecord(imagingSetManager, workspaceArtifactId, imagingSet.ArtifactID);
+				DeleteImagingSetRecord(workspaceArtifactId, imagingSet.ArtifactID);
 
 				// Delete Imaging Profile
 				int imagingProfileArtifactId = imagingSet.ImagingProfile.ArtifactID;
-				DeleteImagingProfileRecord(imagingProfileManager, workspaceArtifactId, imagingProfileArtifactId);
+				DeleteImagingProfileRecord(workspaceArtifactId, imagingProfileArtifactId);
 
 				Console.WriteLine($"Deleted Imaging Set and its associated Imaging Profile. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]");
 			}
@@ -110,7 +124,7 @@ namespace SmokeTest.Helpers
 			}
 		}
 
-		private int CreateImagingProfileRecord(IImagingProfileManager imagingProfileManager, int workspaceArtifactId, string imagingProfileName)
+		private int CreateImagingProfileRecord(int workspaceArtifactId, string imagingProfileName)
 		{
 			string errorContext = $"An error occured when creating an Imaging Profile record. [{nameof(imagingProfileName)}: {imagingProfileName}]";
 			try
@@ -131,7 +145,7 @@ namespace SmokeTest.Helpers
 				try
 				{
 					Console.WriteLine($"Creating new Imaging Profile. [{nameof(imagingProfileName)}: {imagingProfileName}]");
-					imagingProfileArtifactId = imagingProfileManager.SaveAsync(imagingProfile, workspaceArtifactId).Result;
+					imagingProfileArtifactId = ImagingProfileManager.SaveAsync(imagingProfile, workspaceArtifactId).Result;
 					Console.WriteLine($"Created new Imaging Profile. [{nameof(imagingProfileArtifactId)}: {imagingProfileArtifactId}]");
 				}
 				catch (Exception ex)
@@ -146,18 +160,18 @@ namespace SmokeTest.Helpers
 			}
 		}
 
-		private void DeleteImagingProfileRecord(IImagingProfileManager imagingProfileManager, int workspaceArtifactId, int imagingProfileArtifactId)
+		private void DeleteImagingProfileRecord(int workspaceArtifactId, int imagingProfileArtifactId)
 		{
 			string errorContext = $"An error occured when deleting an Imaging Profile record. [{nameof(imagingProfileArtifactId)}: {imagingProfileArtifactId}]";
 			try
 			{
 				Console.WriteLine($"Deleting Imaging Profile. [{nameof(imagingProfileArtifactId)}: {imagingProfileArtifactId}]");
-				ImagingProfile imagingProfile = RetrieveImagingProfileRecord(imagingProfileManager, workspaceArtifactId, imagingProfileArtifactId);
+				ImagingProfile imagingProfile = RetrieveImagingProfileRecord(workspaceArtifactId, imagingProfileArtifactId);
 				if (imagingProfile != null && imagingProfile.ArtifactID > 0)
 				{
 					try
 					{
-						imagingProfileManager.DeleteAsync(imagingProfileArtifactId, workspaceArtifactId).Wait();
+						ImagingProfileManager.DeleteAsync(imagingProfileArtifactId, workspaceArtifactId).Wait();
 						Console.WriteLine($"Deleted Imaging Profile. [{nameof(imagingProfileArtifactId)}: {imagingProfileArtifactId}]");
 					}
 					catch (Exception ex)
@@ -177,7 +191,7 @@ namespace SmokeTest.Helpers
 			}
 		}
 
-		private ImagingProfile RetrieveImagingProfileRecord(IImagingProfileManager imagingProfileManager, int workspaceArtifactId, int imagingProfileArtifactId)
+		private ImagingProfile RetrieveImagingProfileRecord(int workspaceArtifactId, int imagingProfileArtifactId)
 		{
 			string errorContext = $"An error occured when retriving an Imaging Profile record. [{nameof(imagingProfileArtifactId)}: {imagingProfileArtifactId}]";
 			try
@@ -185,7 +199,7 @@ namespace SmokeTest.Helpers
 				try
 				{
 					Console.WriteLine($"Retriving Imaging Profile. [{nameof(imagingProfileArtifactId)}: {imagingProfileArtifactId}]");
-					ImagingProfile imagingProfile = imagingProfileManager.ReadAsync(imagingProfileArtifactId, workspaceArtifactId).Result;
+					ImagingProfile imagingProfile = ImagingProfileManager.ReadAsync(imagingProfileArtifactId, workspaceArtifactId).Result;
 					Console.WriteLine($"Retrived Imaging Profile. [{nameof(imagingProfileArtifactId)}: {imagingProfileArtifactId}]");
 					return imagingProfile;
 				}
@@ -200,12 +214,12 @@ namespace SmokeTest.Helpers
 			}
 		}
 
-		private int CreateImagingSetRecord(IRSAPIClient rsapiClient, IImagingSetManager imagingSetManager, int workspaceArtifactId, string imagingSetName, string savedSearchName, int imagingProfileArtifactId)
+		private int CreateImagingSetRecord(int workspaceArtifactId, string imagingSetName, string savedSearchName, int imagingProfileArtifactId)
 		{
 			string errorContext = $"An error occured when creating an Imaging Set record. [{nameof(imagingSetName)}: {imagingSetName}]";
 			try
 			{
-				int allDocumentsSavedSearchArtifactId = SavedSearchHelper.GetSavedSearchArtifactId(rsapiClient, workspaceArtifactId, savedSearchName);
+				int allDocumentsSavedSearchArtifactId = SavedSearchHelper.GetSavedSearchArtifactId(RsapiClient, workspaceArtifactId, savedSearchName);
 
 				ImagingSet imagingSet = new ImagingSet
 				{
@@ -222,7 +236,7 @@ namespace SmokeTest.Helpers
 				try
 				{
 					Console.WriteLine($"Creating new Imaging Set. [{nameof(imagingSetName)}: {imagingSetName}]");
-					imagingSetArtifactId = imagingSetManager.SaveAsync(imagingSet, workspaceArtifactId).Result;
+					imagingSetArtifactId = ImagingSetManager.SaveAsync(imagingSet, workspaceArtifactId).Result;
 					Console.WriteLine($"Created new Imaging Set. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]");
 				}
 				catch (Exception ex)
@@ -237,18 +251,18 @@ namespace SmokeTest.Helpers
 			}
 		}
 
-		private void DeleteImagingSetRecord(IImagingSetManager imagingSetManager, int workspaceArtifactId, int imagingSetArtifactId)
+		private void DeleteImagingSetRecord(int workspaceArtifactId, int imagingSetArtifactId)
 		{
 			string errorContext = $"An error occured when deleting an Imaging Set record. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]";
 			try
 			{
 				Console.WriteLine($"Deleting Imaging Set. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]");
-				ImagingSet imagingSet = RetrieveImagingSetRecord(imagingSetManager, workspaceArtifactId, imagingSetArtifactId);
+				ImagingSet imagingSet = RetrieveImagingSetRecord(workspaceArtifactId, imagingSetArtifactId);
 				if (imagingSet != null && imagingSet.ArtifactID > 0)
 				{
 					try
 					{
-						imagingSetManager.DeleteAsync(imagingSetArtifactId, workspaceArtifactId).Wait();
+						ImagingSetManager.DeleteAsync(imagingSetArtifactId, workspaceArtifactId).Wait();
 						Console.WriteLine($"Deleted Imaging Set. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]");
 					}
 					catch (Exception ex)
@@ -267,7 +281,7 @@ namespace SmokeTest.Helpers
 			}
 		}
 
-		private ImagingSet RetrieveImagingSetRecord(IImagingSetManager imagingSetManager, int workspaceArtifactId, int imagingSetArtifactId)
+		private ImagingSet RetrieveImagingSetRecord(int workspaceArtifactId, int imagingSetArtifactId)
 		{
 			string errorContext = $"An error occured when retriving an Imaging Set record. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]";
 			try
@@ -275,7 +289,7 @@ namespace SmokeTest.Helpers
 				try
 				{
 					Console.WriteLine($"Retrieving Imaging Set. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]");
-					ImagingSet imagingSet = imagingSetManager.ReadAsync(imagingSetArtifactId, workspaceArtifactId).Result;
+					ImagingSet imagingSet = ImagingSetManager.ReadAsync(imagingSetArtifactId, workspaceArtifactId).Result;
 					Console.WriteLine($"Retrieved Imaging Set. [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]");
 					return imagingSet;
 				}
@@ -290,7 +304,7 @@ namespace SmokeTest.Helpers
 			}
 		}
 
-		private void RunImagingSet(IImagingJobManager imagingJobManager, int workspaceArtifactId, int imagingSetArtifactId)
+		private void RunImagingSet(int workspaceArtifactId, int imagingSetArtifactId)
 		{
 			string errorContext = $"An error occured when running an Imaging Set [{nameof(imagingSetArtifactId)}: {imagingSetArtifactId}]";
 			try
@@ -304,7 +318,7 @@ namespace SmokeTest.Helpers
 
 				// Run Imaging Set
 				Console.WriteLine($"Running Imaging Job. [{nameof(imagingSetArtifactId)}]: {imagingSetArtifactId}");
-				Guid? imagingJobGuid = (imagingJobManager.RunImagingSetAsync(imagingJob).Result).ImagingJobId;
+				Guid? imagingJobGuid = (ImagingJobManager.RunImagingSetAsync(imagingJob).Result).ImagingJobId;
 				Console.WriteLine($"Ran Imaging Job. [{nameof(imagingJobGuid)}]: {imagingJobGuid}");
 			}
 			catch (Exception ex)
@@ -313,7 +327,7 @@ namespace SmokeTest.Helpers
 			}
 		}
 
-		private bool CheckIfImagingSetIsCompleted(IImagingSetManager imagingSetManager, int workspaceArtifactId, int imagingSetArtifactId)
+		private bool CheckIfImagingSetIsCompleted(int workspaceArtifactId, int imagingSetArtifactId)
 		{
 			// Keep checking the status value for 15 mins.
 			Console.WriteLine("Checking if the documents in the Imaging Set. Check every 1 minutes for upto 15 minutes.");
@@ -322,7 +336,7 @@ namespace SmokeTest.Helpers
 
 			for (int i = 1; i <= count; i++)
 			{
-				ImagingSet imagingSet = RetrieveImagingSetRecord(imagingSetManager, workspaceArtifactId, imagingSetArtifactId);
+				ImagingSet imagingSet = RetrieveImagingSetRecord(workspaceArtifactId, imagingSetArtifactId);
 				ImagingSetStatus imagingSetStatus = imagingSet.Status;
 				if (imagingSetStatus != null)
 				{

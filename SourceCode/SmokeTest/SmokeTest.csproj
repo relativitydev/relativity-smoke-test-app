@@ -55,8 +55,9 @@
     <Reference Include="Relativity.API, Version=10.1.199.4, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.Api.10.1.199.4\lib\net462\Relativity.API.dll</HintPath>
     </Reference>
-    <Reference Include="Relativity.DocumentViewer.Services.Interfaces">
-      <HintPath>..\Assemblies\Relativity.DocumentViewer.Services.Interfaces.dll</HintPath>
+    <Reference Include="Relativity.DocumentViewer.Services.Interfaces, Version=10.0.161.8, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Relativity.DocumentViewer.Services.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="Relativity.Imaging.Services.Interfaces">
       <HintPath>..\Assemblies\Relativity.Imaging.Services.Interfaces.dll</HintPath>
@@ -74,8 +75,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Assemblies\Relativity.Processing.Services.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="Relativity.Productions.Services.Interfaces">
-      <HintPath>..\Assemblies\Relativity.Productions.Services.Interfaces.dll</HintPath>
+    <Reference Include="Relativity.Productions.Services.Interfaces, Version=10.1.29.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Relativity.Productions.Client.10.1.29\lib\net462\Relativity.Productions.Services.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="Relativity.Services.DataContracts, Version=10.1.199.4, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.ObjectManager.10.1.199.4\lib\net462\Relativity.Services.DataContracts.dll</HintPath>
@@ -128,6 +129,7 @@
     <Compile Include="Helpers\UserHelper.cs" />
     <Compile Include="Interfaces\IGroupHelper.cs" />
     <Compile Include="Interfaces\IFieldHelper.cs" />
+    <Compile Include="Models\AuditQueryRequestModel.cs" />
     <Compile Include="Models\ClientModel.cs" />
     <Compile Include="Models\MarkupSetModel.cs" />
     <Compile Include="Models\ProductionModel.cs" />

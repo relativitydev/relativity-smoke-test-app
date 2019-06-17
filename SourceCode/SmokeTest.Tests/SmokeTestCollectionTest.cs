@@ -6,6 +6,7 @@ using Relativity.DocumentViewer.Services;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
+using Relativity.Services.Interfaces.DtSearchIndexManager;
 using Relativity.Services.Objects;
 using Relativity.Services.ResourcePool;
 using Relativity.Services.Search;
@@ -34,6 +35,8 @@ namespace SmokeTest.Tests
 		public IProcessingDataSourceManager ProcessingDataSourceManager { get; set; }
 		public IResourcePoolManager ResourcePoolManager { get; set; }
 		public IProcessingJobManager ProcessingJobManager { get; set; }
+		public IdtSearchManager DtSearchManager { get; set; }
+		public IDtSearchIndexManager DtSearchIndexManager { get; set; }
 
 		[SetUp]
 		public void SetUp()
@@ -51,8 +54,12 @@ namespace SmokeTest.Tests
 			ProcessingDataSourceManager = ServiceFactory.CreateProxy<IProcessingDataSourceManager>();
 			ResourcePoolManager = ServiceFactory.CreateProxy<IResourcePoolManager>();
 			ProcessingJobManager = ServiceFactory.CreateProxy<IProcessingJobManager>();
-			IDBContext workspaceDbContext = new DbContext("serverName", "databaseName", "sqlServerUsername", "sqlServerPassword");
-
+			ImagingProfileManager = ServiceFactory.CreateProxy<IImagingProfileManager>();
+			ImagingSetManager = ServiceFactory.CreateProxy<IImagingSetManager>();
+			ImagingJobManager = ServiceFactory.CreateProxy<IImagingJobManager>();
+			DtSearchManager = ServiceFactory.CreateProxy<IdtSearchManager>();
+			DtSearchIndexManager = ServiceFactory.CreateProxy<IDtSearchIndexManager>();
+			IDBContext workspaceDbContext = new DbContext(Constants.ServerName, $"EDDS{Constants.WorkspaceArtifactId}", Constants.SqlLogin, Constants.SqlPassword);
 			int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(Constants.WorkspaceArtifactId);
 			Sut = new SmokeTestCollection(
 					rsapiClient: RsapiClient,
@@ -70,9 +77,12 @@ namespace SmokeTest.Tests
 					processingDataSourceManager: ProcessingDataSourceManager,
 					resourcePoolManager: ResourcePoolManager,
 					processingJobManager: ProcessingJobManager,
+					dtSearchManager: DtSearchManager,
+					dtSearchIndexManager: DtSearchIndexManager,
 					workspaceDbContext: workspaceDbContext,
 					workspaceArtifactId: Constants.WorkspaceArtifactId,
-					documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId);
+					documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId,
+					relativityUrl: Constants.RelativityUrl);
 		}
 
 		[TearDown]
@@ -120,6 +130,20 @@ namespace SmokeTest.Tests
 		{
 			ResultModel agentResultModel = Sut.AgentTest();
 			Assert.That(agentResultModel.Success, Is.EqualTo(true));
+		}
+
+		[Test]
+		public void ImagingTest()
+		{
+			ResultModel imagingResultModel = Sut.ImageTest();
+			Assert.That(imagingResultModel.Success, Is.EqualTo(true));
+		}
+
+		[Test]
+		public void ConversionTest()
+		{
+			ResultModel conversionResultModel = Sut.ConversionTest();
+			Assert.That(conversionResultModel.Success, Is.EqualTo(true));
 		}
 
 		[Test]

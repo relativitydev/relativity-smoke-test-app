@@ -6,8 +6,8 @@ namespace SmokeTest.Interfaces
 {
 	public interface IImageHelper
 	{
-		ResultModel ImageDocuments(IRSAPIClient rsapiClient, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, int workspaceArtifactId);
+		ResultModel ImageDocuments(int workspaceArtifactId);
 
-		void DeleteImagingSet(IImagingSetManager imagingSetManager, IImagingProfileManager imagingProfileManager, int workspaceArtifactId, int imagingSetArtifactId);
+		void DeleteImagingSet(int workspaceArtifactId, int imagingSetArtifactId);
 	}
 }

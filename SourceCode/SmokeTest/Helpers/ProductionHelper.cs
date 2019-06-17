@@ -9,7 +9,9 @@ using SmokeTest.Models;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Relativity.Productions.Services.Interfaces.DTOs;
 
 namespace SmokeTest.Helpers
 {
@@ -221,7 +223,7 @@ namespace SmokeTest.Helpers
 			{
 				Console.WriteLine("Production Set staging.....");
 				StageProductionSet(productionManager, workspaceArtifactId, productionSetArtifactId);
-				WaitForStatusToBe(productionManager, ProductionStatus.Staged, productionSetArtifactId, workspaceArtifactId, stagingAndProductionWaitTimeOutInSeconds);
+				WaitForStatusToBe(productionManager, ProductionStatus.Staged, productionSetArtifactId, workspaceArtifactId, stagingAndProductionWaitTimeOutInSeconds).Wait();
 				Console.WriteLine("Production Set staged.....");
 			}
 			catch (Exception ex)
@@ -237,7 +239,7 @@ namespace SmokeTest.Helpers
 				RunAndWaitForProductionSetToBeStaged(productionManager, workspaceArtifactId, productionSetArtifactId, stagingAndProductionWaitTimeOutInSeconds);
 				Console.WriteLine("Production Set producing.....");
 				RunProductionSet(productionManager, workspaceArtifactId, productionSetArtifactId);
-				WaitForStatusToBe(productionManager, ProductionStatus.Produced, productionSetArtifactId, workspaceArtifactId, stagingAndProductionWaitTimeOutInSeconds);
+				WaitForStatusToBe(productionManager, ProductionStatus.Produced, productionSetArtifactId, workspaceArtifactId, stagingAndProductionWaitTimeOutInSeconds).Wait();
 				Console.WriteLine("Production Set produced.....");
 			}
 			catch (Exception ex)
@@ -246,46 +248,29 @@ namespace SmokeTest.Helpers
 			}
 		}
 
-		private void WaitForStatusToBe(IProductionManager productionManager, ProductionStatus productionStatus, int productionSetArtifactId, int workspaceArtifactId, int timeout)
+		private async Task WaitForStatusToBe(IProductionManager productionManager, ProductionStatus productionStatus, int productionSetArtifactId, int workspaceArtifactId, int timeout)
 		{
-			int retry = 1;
-			Production prod = new Production();
-			while (retry != 0 && retry < 10)
+			int maxTimeInMilliseconds = (timeout * 1000);
+			int sleepTimeInMilliSeconds = 15000;
+			int currentWaitTimeInMilliseconds = 0;
+
+			ProductionStatusDetailsResult productionStatusDetailsResult = await productionManager.GetProductionStatusDetails(workspaceArtifactId, productionSetArtifactId);
+			string productionStatusString = null;
+			if (productionStatus == ProductionStatus.Staged)
 			{
-				try
-				{
-					var prodTask = productionManager.ReadSingleAsync(workspaceArtifactId, productionSetArtifactId);
-					prodTask.Wait();
-					retry = 0;
-					prod = prodTask.Result;
-				}
-				catch
-				{
-					retry += 1;
-				}
+				productionStatusString = "Staged";
+			}
+			else
+			{
+				productionStatusString = "Produced";
 			}
 
-			Stopwatch s = new Stopwatch();
-			s.Start();
-			while (!prod.ProductionMetadata.Status.Equals(productionStatus))
+			while (currentWaitTimeInMilliseconds < maxTimeInMilliseconds && (string)productionStatusDetailsResult.StatusDetails.FirstOrDefault().Value != productionStatusString)
 			{
-				if (s.Elapsed > TimeSpan.FromSeconds(timeout))
-				{
-					throw new TimeoutException($"Failed to get to status: {productionStatus}. Current status: {prod.ProductionMetadata.Status}. \n LastRunError: {prod.ProductionMetadata.LastRunError}");
-				}
-				try
-				{
-					Task<Production> prodTask = productionManager.ReadSingleAsync(workspaceArtifactId, productionSetArtifactId);
-					prodTask.Wait();
-					prod = prodTask.Result;
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine($"Failed to read production {productionSetArtifactId} \nException: {ex.Message} \nInner Exception: {ex.InnerException}");
-					throw;
-				}
+				Thread.Sleep(sleepTimeInMilliSeconds);
+				productionStatusDetailsResult = await productionManager.GetProductionStatusDetails(workspaceArtifactId, productionSetArtifactId);
+				currentWaitTimeInMilliseconds += sleepTimeInMilliSeconds;
 			}
-			s.Stop();
 		}
 	}
 }
