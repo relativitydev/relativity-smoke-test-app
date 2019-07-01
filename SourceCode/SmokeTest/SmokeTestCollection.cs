@@ -95,7 +95,7 @@ namespace SmokeTest
 			SmokeTests.Add(new SmokeTestModel(70, "Image Test", ImageTest));
 			SmokeTests.Add(new SmokeTestModel(80, "Conversion Test", ConversionTest));
 			SmokeTests.Add(new SmokeTestModel(60, "Production Test", ProductionTest));
-			SmokeTests.Add(new SmokeTestModel(90, "Processing Test", ProcessingTest));
+			//SmokeTests.Add(new SmokeTestModel(90, "Processing Test", ProcessingTest)); //Uncomment if you would like to run the Processing Test
 			SmokeTests.Add(new SmokeTestModel(100, "Data Grid Test", DataGridTest));
 		}
 
