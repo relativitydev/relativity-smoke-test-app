@@ -12,6 +12,7 @@ using SmokeTest.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using Relativity.Services.InstanceSetting;
 using Relativity.Services.Interfaces.DtSearchIndexManager;
 
 namespace SmokeTest.Agents
@@ -46,6 +47,7 @@ namespace SmokeTest.Agents
 				IDBContext eddsDbContext = Helper.GetDBContext(-1);
 				IdtSearchManager dtSearchManager = Helper.GetServicesManager().CreateProxy<IdtSearchManager>(systemExecutionIdentity);
 				IDtSearchIndexManager dtSearchIndexManager = Helper.GetServicesManager().CreateProxy<IDtSearchIndexManager>(systemExecutionIdentity);
+				IInstanceSettingManager instanceSettingManager = Helper.GetServicesManager().CreateProxy<IInstanceSettingManager>(systemExecutionIdentity);
 				List<int> workspaceArtifactIds = RetrieveAllApplicationWorkspaces(eddsDbContext, Constants.Guids.Application.SmokeTest);
 
 				foreach (int currentWorkspaceArtifactId in workspaceArtifactIds)
@@ -79,7 +81,8 @@ namespace SmokeTest.Agents
 									dtSearchIndexManager: dtSearchIndexManager,
 									workspaceArtifactId: currentWorkspaceArtifactId,
 									documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId,
-									relativityUrl: relativityUrl);
+									relativityUrl: relativityUrl,
+									instanceSettingManager: instanceSettingManager);
 							smokeTestCollection.Run();
 						}
 						catch (Exception ex)
