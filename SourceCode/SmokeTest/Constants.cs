@@ -13,6 +13,12 @@ namespace SmokeTest
 		public const int NumberOfTextFilesToCreate = 10;
 		public const String ProcessingLoadFilePath = "C:\\Program Files\\kCura Corporation\\Relativity\\Licenses\\jQuery";
 
+		public class InstanceSetting
+		{
+			public const string Name = "SmokeTestShouldRunProcessingTest";
+			public const string Section = "Relativity.SmokeTest";
+		}
+
 		public class Agents
 		{
 			public const string SMOKE_TEST_APPLICATION_NAME = "Smoke Test";

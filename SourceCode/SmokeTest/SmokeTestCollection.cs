@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Relativity.Services.InstanceSetting;
 using Relativity.Services.Interfaces.DtSearchIndexManager;
 using IAgentHelper = SmokeTest.Interfaces.IAgentHelper;
 
@@ -47,11 +48,12 @@ namespace SmokeTest
 		public IdtSearchManager DtSearchManager { get; set; }
 		public IDtSearchIndexManager DtSearchIndexManager { get; set; }
 		public string RelativityUrl { get; set; }
+		public IInstanceSettingManager InstanceSettingManager { get; set; }
 
 
 		public SmokeTestCollection(IRSAPIClient rsapiClient, Relativity.Services.Interfaces.Agent.IAgentManager agentManager, IObjectManager objectManager, IProductionManager productionManager,
 				IProductionDataSourceManager productionDataSourceManager, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolManager, IProcessingJobManager processingJobManager,
-				IKeywordSearchManager keywordSearchManager, IDocumentViewerServiceManager documentViewerServiceManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, IDBContext workspaceDbContext, IdtSearchManager dtSearchManager, IDtSearchIndexManager dtSearchIndexManager, int workspaceArtifactId, int documentIdentifierFieldArtifactId, string relativityUrl)
+				IKeywordSearchManager keywordSearchManager, IDocumentViewerServiceManager documentViewerServiceManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, IDBContext workspaceDbContext, IdtSearchManager dtSearchManager, IDtSearchIndexManager dtSearchIndexManager, int workspaceArtifactId, int documentIdentifierFieldArtifactId, string relativityUrl, IInstanceSettingManager instanceSettingManager)
 		{
 			RsapiClient = rsapiClient;
 			AgentManager = agentManager;
@@ -75,6 +77,7 @@ namespace SmokeTest
 			DocumentIdentifierFieldArtifactId = documentIdentifierFieldArtifactId;
 			RdoHelper = new RdoHelper();
 			RelativityUrl = relativityUrl;
+			InstanceSettingManager = instanceSettingManager;
 		}
 
 		public void Run()
@@ -95,8 +98,38 @@ namespace SmokeTest
 			SmokeTests.Add(new SmokeTestModel(70, "Image Test", ImageTest));
 			SmokeTests.Add(new SmokeTestModel(80, "Conversion Test", ConversionTest));
 			SmokeTests.Add(new SmokeTestModel(60, "Production Test", ProductionTest));
-			SmokeTests.Add(new SmokeTestModel(90, "Processing Test", ProcessingTest));
+			if (ShouldCreateProcessingSmokeTest())
+			{
+				SmokeTests.Add(new SmokeTestModel(90, "Processing Test", ProcessingTest));
+			}
 			SmokeTests.Add(new SmokeTestModel(100, "Data Grid Test", DataGridTest));
+		}
+
+		private bool ShouldCreateProcessingSmokeTest()
+		{
+			try
+			{
+				Relativity.Services.Query query = new Relativity.Services.Query();
+				query.Condition = $"'Section' == '{Constants.InstanceSetting.Section}' AND 'Name' == '{Constants.InstanceSetting.Name}'";
+				InstanceSettingQueryResultSet instanceSettingQueryResultSet = InstanceSettingManager.QueryAsync(query).Result;
+				if (instanceSettingQueryResultSet.Success)
+				{
+					if (instanceSettingQueryResultSet.Results.Count > 0)
+					{
+						InstanceSetting instanceSetting = instanceSettingQueryResultSet.Results.First().Artifact;
+						if (instanceSetting != null)
+						{
+							return bool.Parse(instanceSetting.Value);
+						}
+					}
+				}
+
+				return true;
+			}
+			catch (Exception ex)
+			{
+				throw new Exception("Failed to determine whether to Create Processing Smoke Test", ex);
+			}
 		}
 
 		private void CreateAllTests()

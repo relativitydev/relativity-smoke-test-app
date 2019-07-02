@@ -6,6 +6,7 @@ using Relativity.DocumentViewer.Services;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
+using Relativity.Services.InstanceSetting;
 using Relativity.Services.Interfaces.DtSearchIndexManager;
 using Relativity.Services.Objects;
 using Relativity.Services.ResourcePool;
@@ -37,6 +38,7 @@ namespace SmokeTest.Tests
 		public IProcessingJobManager ProcessingJobManager { get; set; }
 		public IdtSearchManager DtSearchManager { get; set; }
 		public IDtSearchIndexManager DtSearchIndexManager { get; set; }
+		public IInstanceSettingManager InstanceSettingManager { get; set; }
 
 		[SetUp]
 		public void SetUp()
@@ -59,6 +61,7 @@ namespace SmokeTest.Tests
 			ImagingJobManager = ServiceFactory.CreateProxy<IImagingJobManager>();
 			DtSearchManager = ServiceFactory.CreateProxy<IdtSearchManager>();
 			DtSearchIndexManager = ServiceFactory.CreateProxy<IDtSearchIndexManager>();
+			InstanceSettingManager = ServiceFactory.CreateProxy<IInstanceSettingManager>();
 			IDBContext workspaceDbContext = new DbContext(Constants.ServerName, $"EDDS{Constants.WorkspaceArtifactId}", Constants.SqlLogin, Constants.SqlPassword);
 			int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(Constants.WorkspaceArtifactId);
 			Sut = new SmokeTestCollection(
@@ -82,7 +85,8 @@ namespace SmokeTest.Tests
 					workspaceDbContext: workspaceDbContext,
 					workspaceArtifactId: Constants.WorkspaceArtifactId,
 					documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId,
-					relativityUrl: Constants.RelativityUrl);
+					relativityUrl: Constants.RelativityUrl,
+					instanceSettingManager: InstanceSettingManager);
 		}
 
 		[TearDown]
