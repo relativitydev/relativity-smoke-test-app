@@ -320,11 +320,9 @@ namespace SmokeTest.Helpers
 			}
 			catch (Exception e)
 			{
-				throw new SmokeTestException($@"Error Creating random text files for procssing {e.ToString()}");
+				throw new SmokeTestException($@"Error Creating random text files for processing {e.ToString()}");
 			}
-
 		}
-
 
 		private void CreateProcessingDataSource(int workspaceId, int custodianId, int processingSetId, int timeZoneId, int destinationFolderArtifactId, string processingSource)
 		{

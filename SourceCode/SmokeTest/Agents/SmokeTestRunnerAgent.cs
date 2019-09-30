@@ -1,6 +1,5 @@
 ﻿using kCura.Relativity.Client;
 using Relativity.API;
-using Relativity.DocumentViewer.Services;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
@@ -12,8 +11,9 @@ using SmokeTest.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using Relativity.Compute.dtSearch.Services.Interfaces;
+using Relativity.DocumentViewer.Services;
 using Relativity.Services.InstanceSetting;
-using Relativity.Services.Interfaces.DtSearchIndexManager;
 
 namespace SmokeTest.Agents
 {

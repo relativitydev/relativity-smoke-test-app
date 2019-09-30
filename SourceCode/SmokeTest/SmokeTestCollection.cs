@@ -17,8 +17,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Relativity.Compute.dtSearch.Services.Interfaces;
 using Relativity.Services.InstanceSetting;
-using Relativity.Services.Interfaces.DtSearchIndexManager;
 using IAgentHelper = SmokeTest.Interfaces.IAgentHelper;
 
 namespace SmokeTest

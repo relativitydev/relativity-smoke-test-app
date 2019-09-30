@@ -1,6 +1,13 @@
 ﻿using kCura.Relativity.Client;
 using kCura.Relativity.Client.DTOs;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Relativity.Compute.dtSearch.Services.Interfaces;
+using Relativity.Compute.dtSearch.Services.Interfaces.Models;
+using Relativity.Services.Field;
+using Relativity.Services.Search;
+using Relativity.Services.SearchIndex;
+using Relativity.Services.User;
 using SmokeTest.Exceptions;
 using SmokeTest.Models;
 using System;
@@ -9,17 +16,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Relativity.Services.Field;
-using Relativity.Services.Interfaces.DtSearchIndexManager;
-using Relativity.Services.Interfaces.DtSearchIndexManager.Models;
-using Relativity.Services.Interfaces.ObjectRules;
-using Relativity.Services.Search;
-using Relativity.Services.SearchIndex;
-using Relativity.Services.User;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SmokeTest.Helpers
 {
@@ -35,7 +33,7 @@ namespace SmokeTest.Helpers
 
 		public DataGridHelper(IRSAPIClient client, IKeywordSearchManager keywordSearchManager, IdtSearchManager dtSearchManager, IDtSearchIndexManager dtSearchIndexManager, string relativityUrl)
 		{
-			
+
 			RsapiClient = client ?? throw new ArgumentNullException(nameof(client));
 			KeywordSearchManager = keywordSearchManager ?? throw new ArgumentNullException(nameof(keywordSearchManager));
 			DtSearchManager = dtSearchManager ?? throw new ArgumentNullException(nameof(dtSearchManager));
@@ -98,23 +96,26 @@ namespace SmokeTest.Helpers
 
 							if (documents.Count > 0)
 							{
-								//Check that admin audits exist
-								if (CheckIfAdminAuditsExist())
-								{
-									retVal.Success = true;
-								}
-								else
-								{
-									retVal.Success = false;
-									retVal.ErrorMessage = "Admin Audits do not exist";
-								}
+								retVal.Success = true;
+
+								//Commenting the code to check for admin audits. Not sure if this is required to verify dtSearch is working 9/30/2019 (Chandra)
+								////Check that admin audits exist
+								//if (CheckIfAdminAuditsExist())
+								//{
+								//	retVal.Success = true;
+								//}
+								//else
+								//{
+								//	retVal.Success = false;
+								//	retVal.ErrorMessage = "Admin Audits do not exist";
+								//}
 							}
 							else
 							{
-							retVal.Success = false;
-							retVal.ErrorMessage = "dtSearch failed to return documents.";
+								retVal.Success = false;
+								retVal.ErrorMessage = "dtSearch failed to return documents.";
+							}
 						}
-					}
 					}
 				}
 			}
@@ -272,7 +273,7 @@ namespace SmokeTest.Helpers
 				const int count = 60;
 				const int waitingSeconds = 1;
 				int i = 0;
-				while(i < count)
+				while (i < count)
 				{
 					DtSearchIndexStatus dtSearchIndexStatus = await DtSearchIndexManager.GetIndexIDAndStatusAsync(workspaceID, dtSearchIndexArtifactId);
 					if (dtSearchIndexStatus.Status == "Indexed")
@@ -406,18 +407,18 @@ namespace SmokeTest.Helpers
 					{
 						artifactTypeID = 0
 					},
-					fields = new []
+					fields = new[]
 					{
 						new Models.Field()
 						{
 							Name = "Action",
 							Guids = {},
 							ArtifactID = 0
-						}, 
+						},
 					},
 					condition = "",
 					rowCondition = "",
-					sorts = {},
+					sorts = { },
 					relationalField = null,
 					searchProviderCondition = null,
 					includeIdWindow = true,
