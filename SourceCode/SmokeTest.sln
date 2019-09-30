@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmokeTest", "SmokeTest\SmokeTest.csproj", "{CF3DA41D-ED6E-43A3-B907-222FF21116B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmokeTest.Tests", "SmokeTest.Tests\SmokeTest.Tests.csproj", "{6238321A-5C0A-4E79-B5D1-F6D0FF6D850C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmokeTest.Tests.Integration", "SmokeTest.Tests.Integration\SmokeTest.Tests.Integration.csproj", "{6238321A-5C0A-4E79-B5D1-F6D0FF6D850C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

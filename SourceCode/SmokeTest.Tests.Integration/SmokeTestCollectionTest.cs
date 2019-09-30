@@ -2,19 +2,19 @@
 using kCura.Relativity.Client;
 using NUnit.Framework;
 using Relativity.API;
+using Relativity.Compute.dtSearch.Services.Interfaces;
 using Relativity.DocumentViewer.Services;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
 using Relativity.Services.InstanceSetting;
-using Relativity.Services.Interfaces.DtSearchIndexManager;
 using Relativity.Services.Objects;
 using Relativity.Services.ResourcePool;
 using Relativity.Services.Search;
 using Relativity.Services.ServiceProxy;
 using SmokeTest.Models;
 
-namespace SmokeTest.Tests
+namespace SmokeTest.Tests.Integration
 {
 	[TestFixture]
 	public class SmokeTestCollectionTest
@@ -43,7 +43,7 @@ namespace SmokeTest.Tests
 		[SetUp]
 		public void SetUp()
 		{
-			ServiceFactory = new ServiceFactory(Constants.ServiceFactorySettings);
+			ServiceFactory = new ServiceFactory(TestConstants.ServiceFactorySettings);
 			RsapiClient = ServiceFactory.CreateProxy<IRSAPIClient>();
 			AgentManager = ServiceFactory.CreateProxy<Relativity.Services.Interfaces.Agent.IAgentManager>();
 			ObjectManager = ServiceFactory.CreateProxy<IObjectManager>();
@@ -62,8 +62,8 @@ namespace SmokeTest.Tests
 			DtSearchManager = ServiceFactory.CreateProxy<IdtSearchManager>();
 			DtSearchIndexManager = ServiceFactory.CreateProxy<IDtSearchIndexManager>();
 			InstanceSettingManager = ServiceFactory.CreateProxy<IInstanceSettingManager>();
-			IDBContext workspaceDbContext = new DbContext(Constants.ServerName, $"EDDS{Constants.WorkspaceArtifactId}", Constants.SqlLogin, Constants.SqlPassword);
-			int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(Constants.WorkspaceArtifactId);
+			IDBContext workspaceDbContext = new DbContext(TestConstants.ServerName, $"EDDS{TestConstants.WorkspaceArtifactId}", TestConstants.SqlLogin, TestConstants.SqlPassword);
+			int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(TestConstants.WorkspaceArtifactId);
 			Sut = new SmokeTestCollection(
 					rsapiClient: RsapiClient,
 					agentManager: AgentManager,
@@ -83,9 +83,9 @@ namespace SmokeTest.Tests
 					dtSearchManager: DtSearchManager,
 					dtSearchIndexManager: DtSearchIndexManager,
 					workspaceDbContext: workspaceDbContext,
-					workspaceArtifactId: Constants.WorkspaceArtifactId,
+					workspaceArtifactId: TestConstants.WorkspaceArtifactId,
 					documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId,
-					relativityUrl: Constants.RelativityUrl,
+					relativityUrl: TestConstants.RelativityUrl,
 					instanceSettingManager: InstanceSettingManager);
 		}
 

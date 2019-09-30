@@ -2,14 +2,14 @@
 using System;
 using System.Data.SqlClient;
 
-namespace SmokeTest.Tests
+namespace SmokeTest.Tests.Integration
 {
 	public class SqlHelper
 	{
 		public static int GetIdentifierFieldArtifactId(int workspaceArtifactId)
 		{
 			int documentIdentifierFieldArtifactId;
-			string connectionstring = $"Data Source={Constants.ServerName}; Initial Catalog=EDDS{workspaceArtifactId}; User Id={Constants.SqlLogin}; Password={Constants.SqlPassword};";
+			string connectionstring = $"Data Source={TestConstants.ServerName}; Initial Catalog=EDDS{workspaceArtifactId}; User Id={TestConstants.SqlLogin}; Password={TestConstants.SqlPassword};";
 			SqlConnection sqlConnection = new SqlConnection
 			{
 				ConnectionString = connectionstring
