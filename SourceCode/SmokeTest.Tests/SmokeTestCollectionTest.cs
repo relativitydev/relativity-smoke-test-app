@@ -2,7 +2,6 @@
 using kCura.Relativity.Client;
 using NUnit.Framework;
 using Relativity.API;
-using Relativity.DocumentViewer.Services;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
@@ -27,7 +26,6 @@ namespace SmokeTest.Tests
 		public IProductionManager ProductionManager { get; set; }
 		public IProductionDataSourceManager ProductionDataSourceManager { get; set; }
 		public IKeywordSearchManager KeywordSearchManager { get; set; }
-		public IDocumentViewerServiceManager DocumentViewerServiceManager { get; set; }
 		public IImagingProfileManager ImagingProfileManager { get; set; }
 		public IImagingSetManager ImagingSetManager { get; set; }
 		public IImagingJobManager ImagingJobManager { get; set; }
@@ -51,7 +49,6 @@ namespace SmokeTest.Tests
 			ProductionDataSourceManager = ServiceFactory.CreateProxy<IProductionDataSourceManager>();
 			KeywordSearchManager = ServiceFactory.CreateProxy<IKeywordSearchManager>();
 			ProcessingCustodianManager = ServiceFactory.CreateProxy<IProcessingCustodianManager>();
-			DocumentViewerServiceManager = ServiceFactory.CreateProxy<IDocumentViewerServiceManager>();
 			ProcessingSetManager = ServiceFactory.CreateProxy<IProcessingSetManager>();
 			ProcessingDataSourceManager = ServiceFactory.CreateProxy<IProcessingDataSourceManager>();
 			ResourcePoolManager = ServiceFactory.CreateProxy<IResourcePoolManager>();
@@ -71,7 +68,6 @@ namespace SmokeTest.Tests
 					productionManager: ProductionManager,
 					productionDataSourceManager: ProductionDataSourceManager,
 					keywordSearchManager: KeywordSearchManager,
-					documentViewerServiceManager: DocumentViewerServiceManager,
 					imagingProfileManager: ImagingProfileManager,
 					imagingSetManager: ImagingSetManager,
 					imagingJobManager: ImagingJobManager,
@@ -141,13 +137,6 @@ namespace SmokeTest.Tests
 		{
 			ResultModel imagingResultModel = Sut.ImageTest();
 			Assert.That(imagingResultModel.Success, Is.EqualTo(true));
-		}
-
-		[Test]
-		public void ConversionTest()
-		{
-			ResultModel conversionResultModel = Sut.ConversionTest();
-			Assert.That(conversionResultModel.Success, Is.EqualTo(true));
 		}
 
 		[Test]

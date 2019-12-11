@@ -1,6 +1,5 @@
 ﻿using kCura.Relativity.Client;
 using Relativity.API;
-using Relativity.DocumentViewer.Services;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
@@ -35,7 +34,6 @@ namespace SmokeTest.Agents
 				IProductionManager productionManager = Helper.GetServicesManager().CreateProxy<IProductionManager>(systemExecutionIdentity);
 				IProductionDataSourceManager productionDataSourceManager = Helper.GetServicesManager().CreateProxy<IProductionDataSourceManager>(systemExecutionIdentity);
 				IKeywordSearchManager keywordSearchManager = Helper.GetServicesManager().CreateProxy<IKeywordSearchManager>(systemExecutionIdentity);
-				IDocumentViewerServiceManager documentViewerServiceManager = Helper.GetServicesManager().CreateProxy<IDocumentViewerServiceManager>(systemExecutionIdentity);
 				IProcessingCustodianManager processingCustodianManager = Helper.GetServicesManager().CreateProxy<IProcessingCustodianManager>(systemExecutionIdentity);
 				IProcessingSetManager processingSetManager = Helper.GetServicesManager().CreateProxy<IProcessingSetManager>(systemExecutionIdentity);
 				IProcessingDataSourceManager processingDataSourceManager = Helper.GetServicesManager().CreateProxy<IProcessingDataSourceManager>(systemExecutionIdentity);
@@ -67,7 +65,6 @@ namespace SmokeTest.Agents
 									productionManager: productionManager,
 									productionDataSourceManager: productionDataSourceManager,
 									keywordSearchManager: keywordSearchManager,
-									documentViewerServiceManager: documentViewerServiceManager,
 									imagingProfileManager: imagingProfileManager,
 									imagingSetManager: imagingSetManager,
 									imagingJobManager: imagingJobManager,
@@ -97,7 +94,6 @@ namespace SmokeTest.Agents
 							productionManager?.Dispose();
 							productionDataSourceManager?.Dispose();
 							keywordSearchManager?.Dispose();
-							documentViewerServiceManager?.Dispose();
 							processingCustodianManager?.Dispose();
 							processingSetManager?.Dispose();
 							processingDataSourceManager?.Dispose();

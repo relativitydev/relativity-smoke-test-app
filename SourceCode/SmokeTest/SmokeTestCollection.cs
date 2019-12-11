@@ -1,7 +1,6 @@
 ﻿using kCura.Relativity.Client;
 using kCura.Relativity.Client.DTOs;
 using Relativity.API;
-using Relativity.DocumentViewer.Services;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
@@ -32,7 +31,6 @@ namespace SmokeTest
 		public IProductionManager ProductionManager { get; set; }
 		public IProductionDataSourceManager ProductionDataSourceManager { get; set; }
 		public IKeywordSearchManager KeywordSearchManager { get; set; }
-		public IDocumentViewerServiceManager DocumentViewerServiceManager { get; set; }
 		public IImagingProfileManager ImagingProfileManager { get; set; }
 		public IImagingSetManager ImagingSetManager { get; set; }
 		public IImagingJobManager ImagingJobManager { get; set; }
@@ -53,7 +51,7 @@ namespace SmokeTest
 
 		public SmokeTestCollection(IRSAPIClient rsapiClient, Relativity.Services.Interfaces.Agent.IAgentManager agentManager, IObjectManager objectManager, IProductionManager productionManager,
 				IProductionDataSourceManager productionDataSourceManager, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolManager, IProcessingJobManager processingJobManager,
-				IKeywordSearchManager keywordSearchManager, IDocumentViewerServiceManager documentViewerServiceManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, IDBContext workspaceDbContext, IdtSearchManager dtSearchManager, IDtSearchIndexManager dtSearchIndexManager, int workspaceArtifactId, int documentIdentifierFieldArtifactId, string relativityUrl, IInstanceSettingManager instanceSettingManager)
+				IKeywordSearchManager keywordSearchManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, IDBContext workspaceDbContext, IdtSearchManager dtSearchManager, IDtSearchIndexManager dtSearchIndexManager, int workspaceArtifactId, int documentIdentifierFieldArtifactId, string relativityUrl, IInstanceSettingManager instanceSettingManager)
 		{
 			RsapiClient = rsapiClient;
 			AgentManager = agentManager;
@@ -61,7 +59,6 @@ namespace SmokeTest
 			ProductionManager = productionManager;
 			ProductionDataSourceManager = productionDataSourceManager;
 			KeywordSearchManager = keywordSearchManager;
-			DocumentViewerServiceManager = documentViewerServiceManager;
 			ProcessingCustodianManager = processingCustodianManager;
 			ProcessingDataSourceManager = processingDataSourceManager;
 			ProcessingSetManager = processingSetManager;
@@ -95,14 +92,13 @@ namespace SmokeTest
 			SmokeTests.Add(new SmokeTestModel(30, "User Test", UserTest));
 			SmokeTests.Add(new SmokeTestModel(40, "Workspace Test", WorkspaceTest));
 			SmokeTests.Add(new SmokeTestModel(50, "Agent Test", AgentTest));
-			SmokeTests.Add(new SmokeTestModel(70, "Image Test", ImageTest));
-			SmokeTests.Add(new SmokeTestModel(80, "Conversion Test", ConversionTest));
-			SmokeTests.Add(new SmokeTestModel(60, "Production Test", ProductionTest));
+			SmokeTests.Add(new SmokeTestModel(60, "Image Test", ImageTest));
+			SmokeTests.Add(new SmokeTestModel(70, "Production Test", ProductionTest));
 			if (ShouldCreateProcessingSmokeTest())
 			{
-				SmokeTests.Add(new SmokeTestModel(90, "Processing Test", ProcessingTest));
+				SmokeTests.Add(new SmokeTestModel(80, "Processing Test", ProcessingTest));
 			}
-			SmokeTests.Add(new SmokeTestModel(100, "Data Grid Test", DataGridTest));
+			SmokeTests.Add(new SmokeTestModel(90, "Data Grid Test", DataGridTest));
 		}
 
 		private bool ShouldCreateProcessingSmokeTest()
@@ -332,48 +328,6 @@ namespace SmokeTest
 			return imageResultModel;
 		}
 
-		public ResultModel ConversionTest()
-		{
-			ResultModel imageResultModel;
-			try
-			{
-				IViewerHelper viewerHelper = new ViewerHelper(RsapiClient, DocumentViewerServiceManager, WorkspaceDbContext, RelativityUrl);
-				RsapiClient.APIOptions.WorkspaceID = WorkspaceArtifactId;
-				if (!SavedSearchHelper.DocumentsExistInWorkspace(RsapiClient, WorkspaceArtifactId))
-				{
-					imageResultModel = new ResultModel("Viewer")
-					{
-						Success = false,
-						ErrorMessage = "There are no documents in the workspace."
-					};
-				}
-				else
-				{
-					int savedSearchArtifactId = SavedSearchHelper.CreateSavedSearchWithControlNumbers(
-						keywordSearchManager: KeywordSearchManager,
-						rsapiClient: RsapiClient,
-						workspaceArtifactId: WorkspaceArtifactId,
-						documentIdentifierFieldArtifactId: DocumentIdentifierFieldArtifactId,
-						searchName: Constants.AllDocumentsSavedSearchName,
-						controlNumbers: new List<string>());
-
-					imageResultModel = viewerHelper.ConvertDocumentsForViewer(WorkspaceArtifactId);
-
-					SavedSearchHelper.DeleteKeywordSearch(KeywordSearchManager, savedSearchArtifactId, WorkspaceArtifactId).Wait();
-				}
-			}
-			catch (Exception ex)
-			{
-				imageResultModel = new ResultModel("Viewer")
-				{
-					Success = false,
-					ErrorMessage = $@"Error running Text: {ex}"
-				};
-			}
-
-			return imageResultModel;
-		}
-
 		public ResultModel ProductionTest()
 		{
 			ResultModel productionResultModel = new ResultModel("Production");
@@ -421,7 +375,7 @@ namespace SmokeTest
 							stagingAndProductionWaitTimeOutInSeconds: 300);
 					int productionSetArtifactId = productionHelper.CreateAndRunProductionSet(productionModel);
 					ProductionStatusDetailsResult productionStatusDetailsResult = ProductionManager.GetProductionStatusDetails(WorkspaceArtifactId, productionSetArtifactId).Result;
-					string productionStatus = (string) productionStatusDetailsResult.StatusDetails.FirstOrDefault().Value;
+					string productionStatus = (string)productionStatusDetailsResult.StatusDetails.FirstOrDefault().Value;
 
 					if (productionSetArtifactId > 0)
 					{
