@@ -34,7 +34,6 @@ namespace SmokeTest.Helpers
 		public IAuditObjectManagerUIService AuditObjectManagerUiService;
 		public string RelativityUrl;
 		public const String DataGridFieldName = "Extracted Text";
-		//public const String DataGridFieldValue = "DataGridTestRandomFieldValue";
 
 		public DataGridHelper(IRSAPIClient client, IAuditObjectManagerUIService auditObjectManagerUiService, string relativityUrl)
 		{
