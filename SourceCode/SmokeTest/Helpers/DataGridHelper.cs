@@ -132,61 +132,6 @@ namespace SmokeTest.Helpers
 			{
 				throw new Exception(ex.Message);
 			}
-			//HttpClient client = new HttpClient();
-			//client.BaseAddress = new Uri(RelativityUrl);
-			//client.DefaultRequestHeaders.Add("X-CSRF-Header", string.Empty);
-			//client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GenerateAuthToken());
-			//client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-			//string url = $@"/Relativity.Rest/API/Relativity.Objects.Audits/workspaces/-1/audits/query";
-			////string url = $@"Relativity.REST/api/relativity.audit.query/workspaces/-1/audit/UI/query";
-			//AuditQueryRequestModel auditQueryRequestModel = new AuditQueryRequestModel
-			//{
-			//	request = new Request
-			//	{
-			//		objectType = new Objecttype
-			//		{
-			//			artifactTypeID = 0
-			//		},
-			//		fields = new[]
-			//		{
-			//			new Models.Field()
-			//			{
-			//				Name = "Action",
-			//				Guids = {},
-			//				ArtifactID = 0
-			//			},
-			//		},
-			//		condition = "",
-			//		rowCondition = "",
-			//		sorts = { },
-			//		relationalField = null,
-			//		searchProviderCondition = null,
-			//		includeIdWindow = true,
-			//		convertNumberFieldValuesToString = true,
-			//		isAdHocQuery = false,
-			//		activeArtifactId = null,
-			//		queryHint = null,
-			//		executingViewId = 0
-			//	},
-			//	start = 1,
-			//	length = 25
-			//};
-			//string requestString = JsonConvert.SerializeObject(auditQueryRequestModel);
-
-			//StringContent content = new StringContent(requestString);
-			//content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-			//HttpResponseMessage response = client.PostAsync(url, content).Result;
-			//bool success = response.StatusCode == HttpStatusCode.OK;
-			//if (!success)
-			//{
-			//	throw new Exception("An error occured querying for Admin Audits");
-			//}
-
-			//string result = response.Content.ReadAsStringAsync().Result;
-			//JObject resultObject = JObject.Parse(result);
-			//bool doAdminAuditsExist = resultObject["TotalCount"].Value<int>() > 0;
-			//return doAdminAuditsExist;
 		}
 
 		private bool CheckIfDataGridCoreIsInstalled()
