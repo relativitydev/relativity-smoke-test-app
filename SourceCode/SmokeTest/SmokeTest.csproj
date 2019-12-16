@@ -55,11 +55,14 @@
     <Reference Include="Relativity.API, Version=10.1.199.4, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.Api.10.1.199.4\lib\net462\Relativity.API.dll</HintPath>
     </Reference>
+    <Reference Include="Relativity.Audit.Services.Interface, Version=15.3.3.6, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Relativity.Audit.Services.SDK.15.3.3\lib\net462\Relativity.Audit.Services.Interface.dll</HintPath>
+    </Reference>
     <Reference Include="Relativity.Imaging.Services.Interfaces">
       <HintPath>..\Assemblies\Relativity.Imaging.Services.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="Relativity.Kepler, Version=1.0.1.557, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Relativity.ObjectManager.10.1.199.4\lib\net462\Relativity.Kepler.dll</HintPath>
+      <HintPath>..\packages\Relativity.ObjectManager.10.2.194.1\lib\net462\Relativity.Kepler.dll</HintPath>
     </Reference>
     <Reference Include="Relativity.Logging, Version=2018.11.5.9, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.Logging.2018.11.5\lib\net462\Relativity.Logging.dll</HintPath>
@@ -74,17 +77,17 @@
     <Reference Include="Relativity.Productions.Services.Interfaces, Version=10.1.29.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.Productions.Client.10.1.29\lib\net462\Relativity.Productions.Services.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="Relativity.Services.DataContracts, Version=10.1.199.4, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Relativity.ObjectManager.10.1.199.4\lib\net462\Relativity.Services.DataContracts.dll</HintPath>
+    <Reference Include="Relativity.Services.DataContracts, Version=10.2.194.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Relativity.ObjectManager.10.2.194.1\lib\net462\Relativity.Services.DataContracts.dll</HintPath>
     </Reference>
-    <Reference Include="Relativity.Services.Interfaces, Version=10.1.199.4, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Relativity.ObjectManager.10.1.199.4\lib\net462\Relativity.Services.Interfaces.dll</HintPath>
+    <Reference Include="Relativity.Services.Interfaces, Version=10.2.194.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Relativity.ObjectManager.10.2.194.1\lib\net462\Relativity.Services.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="Relativity.Services.Interfaces.Private">
       <HintPath>..\Assemblies\Relativity.Services.Interfaces.Private.dll</HintPath>
     </Reference>
     <Reference Include="Relativity.Services.ServiceProxy, Version=1.0.1.557, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Relativity.ObjectManager.10.1.199.4\lib\net462\Relativity.Services.ServiceProxy.dll</HintPath>
+      <HintPath>..\packages\Relativity.ObjectManager.10.2.194.1\lib\net462\Relativity.Services.ServiceProxy.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

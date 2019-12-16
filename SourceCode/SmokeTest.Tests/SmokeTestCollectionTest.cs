@@ -2,6 +2,7 @@
 using kCura.Relativity.Client;
 using NUnit.Framework;
 using Relativity.API;
+using Relativity.Audit.Services.Interface.Query;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
@@ -34,9 +35,8 @@ namespace SmokeTest.Tests
 		public IProcessingDataSourceManager ProcessingDataSourceManager { get; set; }
 		public IResourcePoolManager ResourcePoolManager { get; set; }
 		public IProcessingJobManager ProcessingJobManager { get; set; }
-		public IdtSearchManager DtSearchManager { get; set; }
-		public IDtSearchIndexManager DtSearchIndexManager { get; set; }
 		public IInstanceSettingManager InstanceSettingManager { get; set; }
+		public IAuditObjectManagerUIService AuditObjectManagerUiService { get; set; }
 
 		[SetUp]
 		public void SetUp()
@@ -56,9 +56,8 @@ namespace SmokeTest.Tests
 			ImagingProfileManager = ServiceFactory.CreateProxy<IImagingProfileManager>();
 			ImagingSetManager = ServiceFactory.CreateProxy<IImagingSetManager>();
 			ImagingJobManager = ServiceFactory.CreateProxy<IImagingJobManager>();
-			DtSearchManager = ServiceFactory.CreateProxy<IdtSearchManager>();
-			DtSearchIndexManager = ServiceFactory.CreateProxy<IDtSearchIndexManager>();
 			InstanceSettingManager = ServiceFactory.CreateProxy<IInstanceSettingManager>();
+			AuditObjectManagerUiService = ServiceFactory.CreateProxy<IAuditObjectManagerUIService>();
 			IDBContext workspaceDbContext = new DbContext(Constants.ServerName, $"EDDS{Constants.WorkspaceArtifactId}", Constants.SqlLogin, Constants.SqlPassword);
 			int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(Constants.WorkspaceArtifactId);
 			Sut = new SmokeTestCollection(
@@ -76,13 +75,13 @@ namespace SmokeTest.Tests
 					processingDataSourceManager: ProcessingDataSourceManager,
 					resourcePoolManager: ResourcePoolManager,
 					processingJobManager: ProcessingJobManager,
-					dtSearchManager: DtSearchManager,
-					dtSearchIndexManager: DtSearchIndexManager,
 					workspaceDbContext: workspaceDbContext,
 					workspaceArtifactId: Constants.WorkspaceArtifactId,
 					documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId,
 					relativityUrl: Constants.RelativityUrl,
-					instanceSettingManager: InstanceSettingManager);
+					instanceSettingManager: InstanceSettingManager,
+					auditObjectManagerUiService: AuditObjectManagerUiService
+					);
 		}
 
 		[TearDown]

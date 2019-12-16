@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Relativity.Audit.Services.Interface.Query;
 using Relativity.Services.InstanceSetting;
 using Relativity.Services.Interfaces.DtSearchIndexManager;
 using IAgentHelper = SmokeTest.Interfaces.IAgentHelper;
@@ -43,15 +44,14 @@ namespace SmokeTest
 		public int WorkspaceArtifactId { get; set; }
 		public int DocumentIdentifierFieldArtifactId { get; set; }
 		public IRdoHelper RdoHelper { get; set; }
-		public IdtSearchManager DtSearchManager { get; set; }
-		public IDtSearchIndexManager DtSearchIndexManager { get; set; }
 		public string RelativityUrl { get; set; }
 		public IInstanceSettingManager InstanceSettingManager { get; set; }
+		public IAuditObjectManagerUIService AuditObjectManagerUiService { get; set; }
 
 
 		public SmokeTestCollection(IRSAPIClient rsapiClient, Relativity.Services.Interfaces.Agent.IAgentManager agentManager, IObjectManager objectManager, IProductionManager productionManager,
 				IProductionDataSourceManager productionDataSourceManager, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolManager, IProcessingJobManager processingJobManager,
-				IKeywordSearchManager keywordSearchManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, IDBContext workspaceDbContext, IdtSearchManager dtSearchManager, IDtSearchIndexManager dtSearchIndexManager, int workspaceArtifactId, int documentIdentifierFieldArtifactId, string relativityUrl, IInstanceSettingManager instanceSettingManager)
+				IKeywordSearchManager keywordSearchManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, IDBContext workspaceDbContext, int workspaceArtifactId, int documentIdentifierFieldArtifactId, string relativityUrl, IInstanceSettingManager instanceSettingManager, IAuditObjectManagerUIService auditObjectManagerUiService)
 		{
 			RsapiClient = rsapiClient;
 			AgentManager = agentManager;
@@ -68,13 +68,12 @@ namespace SmokeTest
 			ResourcePoolManager = resourcePoolManager;
 			ProcessingJobManager = processingJobManager;
 			WorkspaceDbContext = workspaceDbContext;
-			DtSearchManager = dtSearchManager;
-			DtSearchIndexManager = dtSearchIndexManager;
 			WorkspaceArtifactId = workspaceArtifactId;
 			DocumentIdentifierFieldArtifactId = documentIdentifierFieldArtifactId;
 			RdoHelper = new RdoHelper();
 			RelativityUrl = relativityUrl;
 			InstanceSettingManager = instanceSettingManager;
+			AuditObjectManagerUiService = auditObjectManagerUiService;
 		}
 
 		public void Run()
@@ -410,7 +409,7 @@ namespace SmokeTest
 
 		public ResultModel DataGridTest()
 		{
-			DataGridHelper dataGridHelper = new DataGridHelper(RsapiClient, KeywordSearchManager, DtSearchManager, DtSearchIndexManager, RelativityUrl);
+			DataGridHelper dataGridHelper = new DataGridHelper(RsapiClient, AuditObjectManagerUiService, RelativityUrl);
 			return dataGridHelper.VerifyDataGridFunctionality(WorkspaceArtifactId);
 		}
 	}
