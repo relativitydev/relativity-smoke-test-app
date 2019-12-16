@@ -11,6 +11,7 @@ using SmokeTest.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using Relativity.Audit.Services.Interface.Query;
 using Relativity.Services.InstanceSetting;
 using Relativity.Services.Interfaces.DtSearchIndexManager;
 
@@ -43,9 +44,8 @@ namespace SmokeTest.Agents
 				IResourcePoolManager resourcePoolManager = Helper.GetServicesManager().CreateProxy<IResourcePoolManager>(systemExecutionIdentity);
 				IProcessingJobManager processingJobManager = Helper.GetServicesManager().CreateProxy<IProcessingJobManager>(systemExecutionIdentity);
 				IDBContext eddsDbContext = Helper.GetDBContext(-1);
-				IdtSearchManager dtSearchManager = Helper.GetServicesManager().CreateProxy<IdtSearchManager>(systemExecutionIdentity);
-				IDtSearchIndexManager dtSearchIndexManager = Helper.GetServicesManager().CreateProxy<IDtSearchIndexManager>(systemExecutionIdentity);
 				IInstanceSettingManager instanceSettingManager = Helper.GetServicesManager().CreateProxy<IInstanceSettingManager>(systemExecutionIdentity);
+				IAuditObjectManagerUIService auditObjectManagerUiService = Helper.GetServicesManager().CreateProxy<IAuditObjectManagerUIService>(systemExecutionIdentity);
 				List<int> workspaceArtifactIds = RetrieveAllApplicationWorkspaces(eddsDbContext, Constants.Guids.Application.SmokeTest);
 
 				foreach (int currentWorkspaceArtifactId in workspaceArtifactIds)
@@ -74,12 +74,11 @@ namespace SmokeTest.Agents
 									resourcePoolManager: resourcePoolManager,
 									processingJobManager: processingJobManager,
 									workspaceDbContext: workspaceDbContext,
-									dtSearchManager: dtSearchManager,
-									dtSearchIndexManager: dtSearchIndexManager,
 									workspaceArtifactId: currentWorkspaceArtifactId,
 									documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId,
 									relativityUrl: relativityUrl,
-									instanceSettingManager: instanceSettingManager);
+									instanceSettingManager: instanceSettingManager,
+									auditObjectManagerUiService: auditObjectManagerUiService);
 							smokeTestCollection.Run();
 						}
 						catch (Exception ex)
@@ -97,11 +96,13 @@ namespace SmokeTest.Agents
 							processingCustodianManager?.Dispose();
 							processingSetManager?.Dispose();
 							processingDataSourceManager?.Dispose();
+							processingJobManager?.Dispose();
 							resourcePoolManager?.Dispose();
 							processingJobManager?.Dispose();
 							imagingProfileManager?.Dispose();
 							imagingSetManager?.Dispose();
 							imagingJobManager?.Dispose();
+							auditObjectManagerUiService?.Dispose();
 						}
 					}
 				}
