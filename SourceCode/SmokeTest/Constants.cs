@@ -9,6 +9,7 @@ namespace SmokeTest
 		public static readonly string Prefix = "ST";
 		public static readonly int GroupIdentifierFieldArtifactId = 1003671;
 		public const string AllDocumentsSavedSearchName = "All Documents";
+		public const string DevVmComputerName = "RELATIVITYDEVVM";
 
 		public const int NumberOfTextFilesToCreate = 10;
 		public const String ProcessingLoadFilePath = "C:\\Program Files\\kCura Corporation\\Relativity\\Licenses\\jQuery";

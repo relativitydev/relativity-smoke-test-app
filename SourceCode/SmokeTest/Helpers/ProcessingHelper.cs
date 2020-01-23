@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using RelativityApplication = kCura.Relativity.Client.DTOs.RelativityApplication;
 
@@ -20,17 +21,19 @@ namespace SmokeTest.Helpers
 		public IProcessingSetManager ProcessingSetManager;
 		public IProcessingCustodianManager ProcessingCustodianManager;
 		public IProcessingDataSourceManager ProcessingDataSourceManager;
-		public IResourcePoolManager ResourcePoolMananger;
+		public IResourcePoolManager ResourcePoolManager;
 		public IProcessingJobManager ProcessingJobManager;
+		private readonly string _ipAddressForVisualStudio;
 
-		public ProcessingHelper(IRSAPIClient client, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolMananger, IProcessingJobManager processingJobManager)
+		public ProcessingHelper(IRSAPIClient client, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolMananger, IProcessingJobManager processingJobManager, string ipAddressForVisualStudio = null)
 		{
 			RsapiClient = client ?? throw new ArgumentNullException(nameof(client));
 			ProcessingCustodianManager = processingCustodianManager ?? throw new ArgumentNullException(nameof(processingCustodianManager));
 			ProcessingSetManager = processingSetManager ?? throw new ArgumentNullException(nameof(processingSetManager));
 			ProcessingDataSourceManager = processingDataSourceManager ?? throw new ArgumentNullException(nameof(processingDataSourceManager));
-			ResourcePoolMananger = resourcePoolMananger ?? throw new ArgumentNullException(nameof(resourcePoolMananger));
+			ResourcePoolManager = resourcePoolMananger ?? throw new ArgumentNullException(nameof(resourcePoolMananger));
 			ProcessingJobManager = processingJobManager ?? throw new ArgumentNullException(nameof(processingJobManager));
+			_ipAddressForVisualStudio = ipAddressForVisualStudio;
 		}
 
 		public ResultModel CreateAndRunProcessingSet(int workspaceID)
@@ -75,13 +78,23 @@ namespace SmokeTest.Helpers
 						var processingSetArtifactID = CreateProcessingSet(workspaceID, processingProfileArtifactID);
 
 						// Get Processing Source Location Path from the choice selected in the default resource pool
-						var proSourceLocationPath = GetProcessingSourceLocationFromResourcePool();
+						var processingSourceLocationFromResourcePool = GetProcessingSourceLocationFromResourcePool();
 
-						// Create random text files in the Processing  Source Location so that something is availble to import into the workspace
-						CreateRandomTextFiles(proSourceLocationPath, Constants.NumberOfTextFilesToCreate);
+						// Create random text files in the Processing Source Location so that something is available to import into the workspace
+						string networkPathToCreateRandomTextFiles = processingSourceLocationFromResourcePool;
+						if (_ipAddressForVisualStudio != null)
+						{
+							IPAddress ipAddress;
+							if (!IPAddress.TryParse(_ipAddressForVisualStudio, out ipAddress))
+							{
+								throw new SmokeTestException($"Invalid IP Address ({_ipAddressForVisualStudio})");
+							}
+							networkPathToCreateRandomTextFiles = networkPathToCreateRandomTextFiles.Replace(Constants.DevVmComputerName, _ipAddressForVisualStudio);
+						}
+						CreateRandomTextFiles(networkPathToCreateRandomTextFiles, Constants.NumberOfTextFilesToCreate);
 
 						// Create Processing Data Source
-						CreateProcessingDataSource(workspaceID, custodianArtifactID, processingSetArtifactID, timezoneArtifactID, folderArtifactID, proSourceLocationPath);
+						CreateProcessingDataSource(workspaceID, custodianArtifactID, processingSetArtifactID, timezoneArtifactID, folderArtifactID, processingSourceLocationFromResourcePool);
 
 						// Submit Discovery Job and wait 5 minutes for it to complete
 						SubmitDiscoveryJob(workspaceID, processingSetArtifactID);
@@ -295,8 +308,8 @@ namespace SmokeTest.Helpers
 				{
 					Condition = condition.ToQueryString()
 				};
-				var resourcePool = ResourcePoolMananger.QueryAsync(query).Result;
-				var results = ResourcePoolMananger.GetProcessingSourceLocationsAsync(new ResourcePoolRef(resourcePool.Results[0].Artifact.ArtifactID)).Result;
+				var resourcePool = ResourcePoolManager.QueryAsync(query).Result;
+				var results = ResourcePoolManager.GetProcessingSourceLocationsAsync(new ResourcePoolRef(resourcePool.Results[0].Artifact.ArtifactID)).Result;
 				return results[0].Name;
 			}
 			catch (Exception e)
