@@ -70,7 +70,7 @@ namespace SmokeTest
 			RelativityUrl = relativityUrl;
 			InstanceSettingManager = instanceSettingManager;
 			AuditObjectManagerUiService = auditObjectManagerUiService;
-			_ipAddressForVisualStudio = ipAddressForVisualStudio; // We pass this Ip Address when running tests from Visual Studio
+			_ipAddressForVisualStudio = ipAddressForVisualStudio; // Optional, but we are passing the Ip Address of the DevVm/Relativity Instance where the tests are being run
 		}
 
 		public void Run()
