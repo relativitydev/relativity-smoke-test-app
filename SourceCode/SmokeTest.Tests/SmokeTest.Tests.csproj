@@ -37,9 +37,6 @@
     <Reference Include="BCrypt.Net-Core, Version=1.6.0.0, Culture=neutral, PublicKeyToken=4d63bfbfdfd3c6e4, processorArchitecture=MSIL">
       <HintPath>..\packages\BCrypt.Net-Core.1.6.0\lib\net452\BCrypt.Net-Core.dll</HintPath>
     </Reference>
-    <Reference Include="DbContextHelper, Version=5.0.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RelativityDev.DbContextHelper.5.0.0.1\lib\net462\DbContextHelper.dll</HintPath>
-    </Reference>
     <Reference Include="kCura, Version=12.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.Other.12.0.1\lib\net462\kCura.dll</HintPath>
     </Reference>

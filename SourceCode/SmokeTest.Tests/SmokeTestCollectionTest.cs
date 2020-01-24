@@ -1,7 +1,5 @@
-﻿using DbContextHelper;
-using kCura.Relativity.Client;
+﻿using kCura.Relativity.Client;
 using NUnit.Framework;
-using Relativity.API;
 using Relativity.Audit.Services.Interface.Query;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
@@ -57,7 +55,6 @@ namespace SmokeTest.Tests
 			ImagingJobManager = ServiceFactory.CreateProxy<IImagingJobManager>();
 			InstanceSettingManager = ServiceFactory.CreateProxy<IInstanceSettingManager>();
 			AuditObjectManagerUiService = ServiceFactory.CreateProxy<IAuditObjectManagerUIService>();
-			IDBContext workspaceDbContext = new DbContext(TestConstants.ServerName, $"EDDS{TestConstants.WorkspaceArtifactId}", TestConstants.SqlLogin, TestConstants.SqlPassword);
 			int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(TestConstants.WorkspaceArtifactId);
 			Sut = new SmokeTestCollection(
 					rsapiClient: RsapiClient,
@@ -74,7 +71,6 @@ namespace SmokeTest.Tests
 					processingDataSourceManager: ProcessingDataSourceManager,
 					resourcePoolManager: ResourcePoolManager,
 					processingJobManager: ProcessingJobManager,
-					workspaceDbContext: workspaceDbContext,
 					workspaceArtifactId: TestConstants.WorkspaceArtifactId,
 					documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId,
 					relativityUrl: TestConstants.RelativityUrl,

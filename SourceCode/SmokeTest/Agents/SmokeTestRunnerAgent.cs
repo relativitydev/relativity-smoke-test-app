@@ -72,7 +72,6 @@ namespace SmokeTest.Agents
 									processingDataSourceManager: processingDataSourceManager,
 									resourcePoolManager: resourcePoolManager,
 									processingJobManager: processingJobManager,
-									workspaceDbContext: workspaceDbContext,
 									workspaceArtifactId: currentWorkspaceArtifactId,
 									documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId,
 									relativityUrl: relativityUrl,

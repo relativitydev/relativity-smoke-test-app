@@ -1,6 +1,5 @@
 ﻿using kCura.Relativity.Client;
 using kCura.Relativity.Client.DTOs;
-using Relativity.API;
 using Relativity.Audit.Services.Interface.Query;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
@@ -39,7 +38,6 @@ namespace SmokeTest
 		public IProcessingDataSourceManager ProcessingDataSourceManager { get; set; }
 		public IResourcePoolManager ResourcePoolManager { get; set; }
 		public IProcessingJobManager ProcessingJobManager { get; set; }
-		public IDBContext WorkspaceDbContext { get; set; }
 		public int WorkspaceArtifactId { get; set; }
 		public int DocumentIdentifierFieldArtifactId { get; set; }
 		public IRdoHelper RdoHelper { get; set; }
@@ -50,7 +48,7 @@ namespace SmokeTest
 
 		public SmokeTestCollection(IRSAPIClient rsapiClient, Relativity.Services.Interfaces.Agent.IAgentManager agentManager, IObjectManager objectManager, IProductionManager productionManager,
 				IProductionDataSourceManager productionDataSourceManager, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolManager, IProcessingJobManager processingJobManager,
-				IKeywordSearchManager keywordSearchManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, IDBContext workspaceDbContext, int workspaceArtifactId, int documentIdentifierFieldArtifactId, string relativityUrl, IInstanceSettingManager instanceSettingManager, IAuditObjectManagerUIService auditObjectManagerUiService, string ipAddressForVisualStudio = null)
+				IKeywordSearchManager keywordSearchManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, int workspaceArtifactId, int documentIdentifierFieldArtifactId, string relativityUrl, IInstanceSettingManager instanceSettingManager, IAuditObjectManagerUIService auditObjectManagerUiService, string ipAddressForVisualStudio = null)
 		{
 			RsapiClient = rsapiClient;
 			AgentManager = agentManager;
@@ -66,7 +64,6 @@ namespace SmokeTest
 			ImagingJobManager = imagingJobManager;
 			ResourcePoolManager = resourcePoolManager;
 			ProcessingJobManager = processingJobManager;
-			WorkspaceDbContext = workspaceDbContext;
 			WorkspaceArtifactId = workspaceArtifactId;
 			DocumentIdentifierFieldArtifactId = documentIdentifierFieldArtifactId;
 			RdoHelper = new RdoHelper();
