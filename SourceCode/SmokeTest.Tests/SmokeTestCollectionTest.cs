@@ -1,13 +1,10 @@
-﻿using DbContextHelper;
-using kCura.Relativity.Client;
+﻿using kCura.Relativity.Client;
 using NUnit.Framework;
-using Relativity.API;
 using Relativity.Audit.Services.Interface.Query;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
 using Relativity.Services.InstanceSetting;
-using Relativity.Services.Interfaces.DtSearchIndexManager;
 using Relativity.Services.Objects;
 using Relativity.Services.ResourcePool;
 using Relativity.Services.Search;
@@ -41,7 +38,7 @@ namespace SmokeTest.Tests
 		[SetUp]
 		public void SetUp()
 		{
-			ServiceFactory = new ServiceFactory(Constants.ServiceFactorySettings);
+			ServiceFactory = new ServiceFactory(TestConstants.ServiceFactorySettings);
 			RsapiClient = ServiceFactory.CreateProxy<IRSAPIClient>();
 			AgentManager = ServiceFactory.CreateProxy<Relativity.Services.Interfaces.Agent.IAgentManager>();
 			ObjectManager = ServiceFactory.CreateProxy<IObjectManager>();
@@ -58,8 +55,7 @@ namespace SmokeTest.Tests
 			ImagingJobManager = ServiceFactory.CreateProxy<IImagingJobManager>();
 			InstanceSettingManager = ServiceFactory.CreateProxy<IInstanceSettingManager>();
 			AuditObjectManagerUiService = ServiceFactory.CreateProxy<IAuditObjectManagerUIService>();
-			IDBContext workspaceDbContext = new DbContext(Constants.ServerName, $"EDDS{Constants.WorkspaceArtifactId}", Constants.SqlLogin, Constants.SqlPassword);
-			int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(Constants.WorkspaceArtifactId);
+			int documentIdentifierFieldArtifactId = SqlHelper.GetIdentifierFieldArtifactId(TestConstants.WorkspaceArtifactId);
 			Sut = new SmokeTestCollection(
 					rsapiClient: RsapiClient,
 					agentManager: AgentManager,
@@ -75,12 +71,12 @@ namespace SmokeTest.Tests
 					processingDataSourceManager: ProcessingDataSourceManager,
 					resourcePoolManager: ResourcePoolManager,
 					processingJobManager: ProcessingJobManager,
-					workspaceDbContext: workspaceDbContext,
-					workspaceArtifactId: Constants.WorkspaceArtifactId,
+					workspaceArtifactId: TestConstants.WorkspaceArtifactId,
 					documentIdentifierFieldArtifactId: documentIdentifierFieldArtifactId,
-					relativityUrl: Constants.RelativityUrl,
+					relativityUrl: TestConstants.RelativityUrl,
 					instanceSettingManager: InstanceSettingManager,
-					auditObjectManagerUiService: AuditObjectManagerUiService
+					auditObjectManagerUiService: AuditObjectManagerUiService,
+					ipAddressForVisualStudio: TestConstants.ServerName
 					);
 		}
 

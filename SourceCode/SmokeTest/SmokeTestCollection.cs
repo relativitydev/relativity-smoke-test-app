@@ -1,10 +1,11 @@
 ﻿using kCura.Relativity.Client;
 using kCura.Relativity.Client.DTOs;
-using Relativity.API;
+using Relativity.Audit.Services.Interface.Query;
 using Relativity.Imaging.Services.Interfaces;
 using Relativity.Processing.Services;
 using Relativity.Productions.Services;
 using Relativity.Productions.Services.Interfaces.DTOs;
+using Relativity.Services.InstanceSetting;
 using Relativity.Services.Objects;
 using Relativity.Services.ResourcePool;
 using Relativity.Services.Search;
@@ -16,9 +17,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Relativity.Audit.Services.Interface.Query;
-using Relativity.Services.InstanceSetting;
-using Relativity.Services.Interfaces.DtSearchIndexManager;
 using IAgentHelper = SmokeTest.Interfaces.IAgentHelper;
 
 namespace SmokeTest
@@ -40,18 +38,17 @@ namespace SmokeTest
 		public IProcessingDataSourceManager ProcessingDataSourceManager { get; set; }
 		public IResourcePoolManager ResourcePoolManager { get; set; }
 		public IProcessingJobManager ProcessingJobManager { get; set; }
-		public IDBContext WorkspaceDbContext { get; set; }
 		public int WorkspaceArtifactId { get; set; }
 		public int DocumentIdentifierFieldArtifactId { get; set; }
 		public IRdoHelper RdoHelper { get; set; }
 		public string RelativityUrl { get; set; }
 		public IInstanceSettingManager InstanceSettingManager { get; set; }
 		public IAuditObjectManagerUIService AuditObjectManagerUiService { get; set; }
-
+		private readonly string _ipAddressForVisualStudio;
 
 		public SmokeTestCollection(IRSAPIClient rsapiClient, Relativity.Services.Interfaces.Agent.IAgentManager agentManager, IObjectManager objectManager, IProductionManager productionManager,
 				IProductionDataSourceManager productionDataSourceManager, IProcessingCustodianManager processingCustodianManager, IProcessingSetManager processingSetManager, IProcessingDataSourceManager processingDataSourceManager, IResourcePoolManager resourcePoolManager, IProcessingJobManager processingJobManager,
-				IKeywordSearchManager keywordSearchManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, IDBContext workspaceDbContext, int workspaceArtifactId, int documentIdentifierFieldArtifactId, string relativityUrl, IInstanceSettingManager instanceSettingManager, IAuditObjectManagerUIService auditObjectManagerUiService)
+				IKeywordSearchManager keywordSearchManager, IImagingProfileManager imagingProfileManager, IImagingSetManager imagingSetManager, IImagingJobManager imagingJobManager, int workspaceArtifactId, int documentIdentifierFieldArtifactId, string relativityUrl, IInstanceSettingManager instanceSettingManager, IAuditObjectManagerUIService auditObjectManagerUiService, string ipAddressForVisualStudio = null)
 		{
 			RsapiClient = rsapiClient;
 			AgentManager = agentManager;
@@ -67,13 +64,13 @@ namespace SmokeTest
 			ImagingJobManager = imagingJobManager;
 			ResourcePoolManager = resourcePoolManager;
 			ProcessingJobManager = processingJobManager;
-			WorkspaceDbContext = workspaceDbContext;
 			WorkspaceArtifactId = workspaceArtifactId;
 			DocumentIdentifierFieldArtifactId = documentIdentifierFieldArtifactId;
 			RdoHelper = new RdoHelper();
 			RelativityUrl = relativityUrl;
 			InstanceSettingManager = instanceSettingManager;
 			AuditObjectManagerUiService = auditObjectManagerUiService;
+			_ipAddressForVisualStudio = ipAddressForVisualStudio; // Optional, but we are passing the Ip Address of the DevVm/Relativity Instance where the tests are being run
 		}
 
 		public void Run()
@@ -403,7 +400,7 @@ namespace SmokeTest
 
 		public ResultModel ProcessingTest()
 		{
-			ProcessingHelper processingHelper = new ProcessingHelper(RsapiClient, ProcessingCustodianManager, ProcessingSetManager, ProcessingDataSourceManager, ResourcePoolManager, ProcessingJobManager);
+			ProcessingHelper processingHelper = new ProcessingHelper(RsapiClient, ProcessingCustodianManager, ProcessingSetManager, ProcessingDataSourceManager, ResourcePoolManager, ProcessingJobManager, _ipAddressForVisualStudio);
 			return processingHelper.CreateAndRunProcessingSet(WorkspaceArtifactId);
 		}
 

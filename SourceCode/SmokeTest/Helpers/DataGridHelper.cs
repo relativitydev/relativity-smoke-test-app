@@ -1,29 +1,12 @@
 ﻿using kCura.Relativity.Client;
 using kCura.Relativity.Client.DTOs;
-using Newtonsoft.Json.Linq;
+using Relativity.Audit.Services.Interface.Query;
+using Relativity.Services.Objects.DataContracts;
 using SmokeTest.Exceptions;
 using SmokeTest.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Relativity.Services.Field;
-using Relativity.Services.Interfaces.DtSearchIndexManager;
-using Relativity.Services.Interfaces.DtSearchIndexManager.Models;
-using Relativity.Services.Interfaces.ObjectRules;
-using Relativity.Services.Search;
-using Relativity.Services.SearchIndex;
-using Relativity.Services.User;
-using System.Threading;
-using Relativity.Audit.Services.Interface.Query;
-using Relativity.Audit.Services.Interface.Query.Models.AuditObjectManagerUI;
-using Relativity.Services.Objects.DataContracts;
-using QueryResult = Relativity.Services.Objects.DataContracts.QueryResult;
 using Sort = Relativity.Services.Objects.DataContracts.Sort;
 
 namespace SmokeTest.Helpers
