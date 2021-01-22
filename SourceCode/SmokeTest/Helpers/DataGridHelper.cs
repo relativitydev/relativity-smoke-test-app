@@ -52,23 +52,14 @@ namespace SmokeTest.Helpers
 					{
 						// Make sure DataGrid is enabled on the extracted text field
 						var dataGridIsEnabledOnExtractedTextField = CheckIfDataGridIsEnabledOnExtractedTextField();
-						if (!dataGridIsEnabledOnExtractedTextField)
+						if (dataGridIsEnabledOnExtractedTextField)
 						{
-							retVal.Success = false;
-							retVal.ErrorMessage = "Data Grid is not enabled on the extracted text field.";
+							retVal.Success = true;
 						}
 						else
 						{
-							//Check that admin audits exist
-							if (CheckIfAdminAuditsExist())
-							{
-								retVal.Success = true;
-							}
-							else
-							{
-								retVal.Success = false;
-								retVal.ErrorMessage = "Admin Audits do not exist";
-							}
+							retVal.Success = false;
+							retVal.ErrorMessage = "Data Grid is not enabled on the extracted text field.";
 						}
 					}
 				}
@@ -79,41 +70,6 @@ namespace SmokeTest.Helpers
 				retVal.Success = false;
 			}
 			return retVal;
-		}
-
-		private bool CheckIfAdminAuditsExist()
-		{
-			try
-			{
-				QueryRequest request = new QueryRequest
-				{
-					Fields = new List<Relativity.Services.Objects.DataContracts.FieldRef>
-					{
-						new Relativity.Services.Objects.DataContracts.FieldRef{Name = "Audit ID"},
-						new Relativity.Services.Objects.DataContracts.FieldRef{Name = "Details"}
-					},
-					Condition = "",
-					RowCondition = "",
-					Sorts = new List<Sort>
-					{
-						new Sort
-						{
-							Direction = Relativity.Services.Objects.DataContracts.SortEnum.Descending,
-							FieldIdentifier = new Relativity.Services.Objects.DataContracts.FieldRef {Name = "Timestamp"}
-						}
-					},
-					ExecutingSavedSearchID = 0,
-					ExecutingViewID = 0,
-					ActiveArtifactID = 0,
-					MaxCharactersForLongTextValues = 0
-				};
-				QueryResultSlim queryResult = AuditObjectManagerUiService.QuerySlimAsync(-1, request, 1, 25).Result;
-				return queryResult.TotalCount > 0 || queryResult.ResultCount > 0;
-			}
-			catch (Exception ex)
-			{
-				throw new Exception(ex.Message);
-			}
 		}
 
 		private bool CheckIfDataGridCoreIsInstalled()
