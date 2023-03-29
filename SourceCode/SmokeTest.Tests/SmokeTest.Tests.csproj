@@ -43,8 +43,8 @@
     <Reference Include="kCura.Relativity.Client, Version=11.0.162.34, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.Rsapi.11.0.162.34\lib\net462\kCura.Relativity.Client.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=3.7.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.7.1\lib\net45\nunit.framework.dll</HintPath>
@@ -58,14 +58,13 @@
     <Reference Include="Relativity.Audit.Services.Interface, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Relativity.Audit.Services.SDK.17.0.1\lib\net462\Relativity.Audit.Services.Interface.dll</HintPath>
     </Reference>
-    <Reference Include="Relativity.DocumentViewer.Services.Interfaces, Version=9.5.370.136, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\SmokeTest\bin\Debug\Relativity.DocumentViewer.Services.Interfaces.dll</HintPath>
+    <Reference Include="Relativity.DocumentViewer.Services.Interfaces">
+      <HintPath>..\Assemblies\Relativity.DocumentViewer.Services.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="Relativity.Imaging.Services.Interfaces">
       <HintPath>..\Assemblies\Relativity.Imaging.Services.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="Relativity.Kepler, Version=1.0.1.627, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Relativity.Kepler">
       <HintPath>..\packages\Relativity.ObjectManager.11.0.162.34\lib\net462\Relativity.Kepler.dll</HintPath>
     </Reference>
     <Reference Include="Relativity.Logging, Version=2019.5.1.0, Culture=neutral, processorArchitecture=MSIL">
@@ -89,7 +88,7 @@
     <Reference Include="Relativity.Services.Interfaces.Private">
       <HintPath>..\Assemblies\Relativity.Services.Interfaces.Private.dll</HintPath>
     </Reference>
-    <Reference Include="Relativity.Services.ServiceProxy, Version=1.0.1.627, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Relativity.Services.ServiceProxy">
       <HintPath>..\packages\Relativity.ObjectManager.11.0.162.34\lib\net462\Relativity.Services.ServiceProxy.dll</HintPath>
     </Reference>
     <Reference Include="System" />
