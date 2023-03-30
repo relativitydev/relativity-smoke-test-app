@@ -1,6 +1,6 @@
 # relativity-smoke-test-app 
 
-> **WARNING**
+> **Warning**
 >
 > This repository has been archived. It has not been updated for several years and uses a now-defunct API (Relativity Services API).
 
