@@ -18,7 +18,7 @@
 ### Security
 
 - Newtonsoft.Json bumped to 13.0.3 (#16)
-- System.Data.SqlClient bumped to 4.8.5 (#17)
+- System.Data.SqlClient bumped to 4.8.5 (#19)
 
 ## [2.2.2.2] - 2021-01-22
 
