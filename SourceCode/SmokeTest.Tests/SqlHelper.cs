@@ -9,7 +9,7 @@ namespace SmokeTest.Tests
 		public static int GetIdentifierFieldArtifactId(int workspaceArtifactId)
 		{
 			int documentIdentifierFieldArtifactId;
-			string connectionstring = $"Data Source={TestConstants.ServerName}; Initial Catalog=EDDS{workspaceArtifactId}; User Id={TestConstants.SqlLogin}; Password={TestConstants.SqlPassword};";
+			string connectionstring = $"Data Source={TestConstants.SqlInstance}; Initial Catalog=EDDS{workspaceArtifactId}; User Id={TestConstants.SqlLogin}; Password={TestConstants.SqlPassword};";
 			SqlConnection sqlConnection = new SqlConnection
 			{
 				ConnectionString = connectionstring

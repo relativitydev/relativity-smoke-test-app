@@ -5,8 +5,9 @@ namespace SmokeTest.Tests
 {
 	public class TestConstants
 	{
-		public static readonly string ServerName = "172.25.138.163";
-		public static readonly int WorkspaceArtifactId = 1017518;
+		public static readonly string ServerName = "172.30.171.244";
+		public static readonly string SqlInstance = $"{ServerName}\\EDDSINSTANCE001";
+		public static readonly int WorkspaceArtifactId = 1019403;
 		public static readonly string RelativityLogin = "relativity.admin@relativity.com";
 		public static readonly string RelativityPassword = "Test1234!";
 		public static readonly string SqlLogin = "eddsdbo";
